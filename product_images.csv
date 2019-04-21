@@ -1,0 +1,11 @@
+user_id,user_name,user_email,user_id,product_id,product_name,product_description,product_img_id,product_img_path,product_img_type
+1,ujagar,ujagar@gmail.com,1,1,Radhe Radhe,product description here,1,/products/product1.jpg,main
+1,ujagar,ujagar@gmail.com,1,7,Picture abhi baaki hai,product description here,10,/products/product1.jpg,main
+1,ujagar,ujagar@gmail.com,1,7,Picture abhi baaki hai,product description here,11,/products/product2.jpg,extra
+1,ujagar,ujagar@gmail.com,1,7,Picture abhi baaki hai,product description here,12,/products/product3.jpg,extra
+1,ujagar,ujagar@gmail.com,1,7,Picture abhi baaki hai,product description here,13,/products/product4.jpg,extra
+1,ujagar,ujagar@gmail.com,1,8,kya jamana hai,product description here,14,/products/product1.jpg,main
+1,ujagar,ujagar@gmail.com,1,8,kya jamana hai,product description here,15,/products/product2.jpg,extra
+1,ujagar,ujagar@gmail.com,1,8,kya jamana hai,product description here,16,/products/product3.jpg,extra
+1,ujagar,ujagar@gmail.com,1,8,kya jamana hai,product description here,17,/products/product4.jpg,extra
+2,mani,mani@yahoo.com,1,10,fir ek baar modi sarkar,product description here,18,/products/product17.jpg,main
