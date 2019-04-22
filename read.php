@@ -1,4 +1,9 @@
+
 <?php
+/*The short answer is no, it can't be done. It has nothing to do with PDO, though. It has everything to do with MySQL: MySQL isn't PHP. Its job is to store, and fetch data. If you JOIN 2 or more tables, and fetch the result, then the DB will be happy to do so.
+The data will then be fetched "as is", that is to say: in pretty much the same way the data was stored. If you want a 2D array, that would imply the data is stored in a table, that contains fields that are in itself tables. MySQL doesn't do that: it has no nested tables (MS SQL Server can do this, by storing XML in fields, for example).
+However, PHP can process the data returned by the query, using a simple loop:*/
+
 // http://localhost/reactjs-php/api/products/read.php
 // required headers
 header("Access-Control-Allow-Origin: *");
