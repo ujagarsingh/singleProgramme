@@ -54,3 +54,16 @@ SELECT driver.*, sum(booking.total_fair) as final_total, booking.driver_id, book
 			JOIN booking ON driver.id=booking.driver_id
 			GROUP BY driver.id
 			ORDER BY driver.id DESC
+
+*----------------------------
+SELECT d.*, sum(b.total_booking_income) as total_income,
+       i.balance
+FROM driver d JOIN
+     booking b
+     ON d.id = b.driver_id LEFT JOIN
+     (SELECT i.driver_id, SUM(i.credit) - SUM(i.debit) as balance
+      FROM income i
+      GROUP BY i.driver_id) i
+     ON i.driver_id = d.id
+GROUP BY d.id, i.balance
+ORDER BY d.id DESC;
