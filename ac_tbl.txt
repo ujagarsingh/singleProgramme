@@ -48,3 +48,9 @@ ORDER BY
     date_time ASC;
 
 *----------------------------
+
+SELECT driver.*, sum(booking.total_fair) as final_total, booking.driver_id, booking.app_income
+			FROM driver
+			JOIN booking ON driver.id=booking.driver_id
+			GROUP BY driver.id
+			ORDER BY driver.id DESC
