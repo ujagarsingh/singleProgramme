@@ -4,3 +4,7 @@ var timeDiff = Math.abs(date2.getTime() - date1.getTime());
 var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
 alert(diffDays);
 
+
+http://ecologytheme.com/theme/eduread/index.html
+
+https://radixtouch.in/templates/admin/smart/source/light/
