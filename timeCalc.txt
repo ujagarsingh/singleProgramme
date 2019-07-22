@@ -15,3 +15,6 @@ https://www.phpzag.com/how-to-create-dynamic-tree-view-menu-in-php/
 
 // update and insert query
 https://stackoverflow.com/questions/50096162/if-record-exists-update-mysql-table-or-else-insert-using-php
+
+// data-grid
+https://jbetancur.github.io/react-data-table-component/?path=/story/basic--sortable-custom-sort
