@@ -21,3 +21,8 @@ https://jbetancur.github.io/react-data-table-component/?path=/story/basic--sorta
 
 // php api
 https://github.com/psswid/php-rest-api
+
+// row to column 1
+http://buysql.com/mysql/14-how-to-automate-pivot-tables.html
+// row to column 2
+https://dba.stackexchange.com/questions/47902/how-to-transpose-convert-rows-as-columns-in-mysql/47954
