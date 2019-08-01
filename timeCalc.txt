@@ -26,6 +26,7 @@ https://github.com/psswid/php-rest-api
 http://buysql.com/mysql/14-how-to-automate-pivot-tables.html
 // row to column 2
 https://dba.stackexchange.com/questions/47902/how-to-transpose-convert-rows-as-columns-in-mysql/47954
+https://www.w3resource.com/mysql/aggregate-functions-and-grouping/aggregate-functions-and-grouping-group_concat.php
 
 //date picker and multiselect
 
