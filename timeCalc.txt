@@ -39,3 +39,6 @@ https://reactjsexample.com/a-ready-to-use-menu-component-for-react/
 
 // icon
 https://stackoverflow.com/questions/23116591/how-to-include-a-font-awesome-icon-in-reacts-render
+
+// column to array
+https://stackoverflow.com/questions/1538229/create-php-array-from-mysql-column
