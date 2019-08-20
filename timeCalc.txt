@@ -45,3 +45,6 @@ https://stackoverflow.com/questions/1538229/create-php-array-from-mysql-column
 
 // data grid
 http://tabulator.info/docs/4.4/install
+
+// multiple left join
+https://stackoverflow.com/questions/1990352/mysql-multiple-left-joins
