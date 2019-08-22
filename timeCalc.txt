@@ -48,3 +48,5 @@ http://tabulator.info/docs/4.4/install
 
 // multiple left join
 https://stackoverflow.com/questions/1990352/mysql-multiple-left-joins
+// excel to json
+https://stackblitz.com/edit/react-excel-to-json-parser
