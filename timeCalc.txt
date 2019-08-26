@@ -54,3 +54,9 @@ https://stackblitz.com/edit/react-excel-to-json-parser
 
 // data-grid
 https://adazzle.github.io/react-data-grid/docs/quick-start
+
+// image cropper
+https://www.npmjs.com/package/react-image-crop#example
+
+// image gallery
+https://peterpalau.github.io/react-bnb-gallery/
