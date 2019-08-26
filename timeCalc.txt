@@ -60,3 +60,6 @@ https://www.npmjs.com/package/react-image-crop#example
 
 // image gallery
 https://peterpalau.github.io/react-bnb-gallery/
+
+// alert
+https://www.npmjs.com/package/react-confirm-alert
