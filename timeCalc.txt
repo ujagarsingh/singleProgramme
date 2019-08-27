@@ -63,3 +63,6 @@ https://peterpalau.github.io/react-bnb-gallery/
 
 // alert
 https://www.npmjs.com/package/react-confirm-alert
+
+// template
+https://onepagelove.com/templates/free-templates
