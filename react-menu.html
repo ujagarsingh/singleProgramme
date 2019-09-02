@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+ul, #myUL {
+  list-style-type: none;
+}
+
+#myUL {
+  margin: 0;
+  padding: 0;
+}
+
+.caret {
+  cursor: pointer;
+  -webkit-user-select: none; /* Safari 3.1+ */
+  -moz-user-select: none; /* Firefox 2+ */
+  -ms-user-select: none; /* IE 10+ */
+  user-select: none;
+}
+
+.caret::before {
+  content: "\25B6";
+  color: black;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+.caret-down::before {
+  -ms-transform: rotate(90deg); /* IE 9 */
+  -webkit-transform: rotate(90deg); /* Safari */'
+  transform: rotate(90deg);  
+}
+
+.nested {
+  display: none;
+}
+
+.active {
+  display: block;
+}
+</style>
+</head>
+<body>
+
+<h2>Tree View</h2>
+
+<ul id="myUL">
+  <li><span class="caret">Beverages</span>
+    <ul class="nested">
+      <li>Water</li>
+      <li>Coffee</li>
+      <li><span class="caret">Tea</span>
+        <ul class="nested">
+          <li>Black Tea</li>
+          <li>White Tea</li>
+          <li><span class="caret">Green Tea</span>
+            <ul class="nested">
+              <li>Sencha</li>
+              <li>Gyokuro</li>
+              <li>Matcha</li>
+              <li>Pi Lo Chun</li>
+            </ul>
+          </li>
+		  <li><span class="caret">Green Tea</span>
+            <ul class="nested">
+              <li>Sencha</li>
+              <li>Gyokuro</li>
+              <li>Matcha</li>
+              <li>Pi Lo Chun</li>
+            </ul>
+          </li>
+		  <li><span class="caret">Green Tea</span>
+            <ul class="nested">
+              <li>Sencha</li>
+              <li>Gyokuro</li>
+              <li>Matcha</li>
+              <li>Pi Lo Chun</li>
+            </ul>
+          </li>
+        </ul>
+      </li>  <li><span class="caret">Tea</span>
+        <ul class="nested">
+          <li>Black Tea</li>
+          <li>White Tea</li>
+          <li><span class="caret">Green Tea</span>
+            <ul class="nested">
+              <li>Sencha</li>
+              <li>Gyokuro</li>
+              <li>Matcha</li>
+              <li>Pi Lo Chun</li>
+            </ul>
+          </li>
+		  <li><span class="caret">Green Tea</span>
+            <ul class="nested">
+              <li>Sencha</li>
+              <li>Gyokuro</li>
+              <li>Matcha</li>
+              <li>Pi Lo Chun</li>
+            </ul>
+          </li>
+		  <li><span class="caret">Green Tea</span>
+            <ul class="nested">
+              <li>Sencha</li>
+              <li>Gyokuro</li>
+              <li>Matcha</li>
+              <li>Pi Lo Chun</li>
+            </ul>
+          </li>
+        </ul>
+      </li>  
+    </ul>
+  </li>
+   <li><span class="caret">Beverages</span>
+    <ul class="nested">
+      <li>Water</li>
+      <li>Coffee</li>
+      <li><span class="caret">Tea</span>
+        <ul class="nested">
+          <li>Black Tea</li>
+          <li>White Tea</li>
+          <li><span class="caret">Green Tea</span>
+            <ul class="nested">
+              <li>Sencha</li>
+              <li>Gyokuro</li>
+              <li>Matcha</li>
+              <li>Pi Lo Chun</li>
+            </ul>
+          </li>
+        </ul>
+      </li>  
+    </ul>
+  </li>
+</ul>
+
+<script>
+function getChildNodes(node) {
+    var children = new Array();
+    for(var child in node.childNodes) {
+        if(node.childNodes[child].nodeType == 1) {
+            children.push(child);
+        }
+    }
+    return children;
+}
+
+var toggler = document.getElementsByClassName("caret");
+var i;
+
+for (i = 0; i < toggler.length; i++) {
+  toggler[i].addEventListener("click", function() {
+ 			
+	if (this.classList.contains('caret-down')){
+		var _allActive = this.parentElement.parentElement.querySelectorAll(".active");
+			_allActive.forEach(function(item){
+				item.classList.toggle("active");
+			});
+		var _allCaretDown = this.parentElement.parentElement.querySelectorAll(".caret-down");
+			_allCaretDown.forEach(function(item){
+				item.classList.toggle("caret-down");
+			});
+			
+	} else {
+		if(!this.parentElement.parentElement.classList.contains('active')){
+		var _allActive = this.parentElement.parentElement.querySelectorAll(".active");
+			_allActive.forEach(function(item){
+				item.classList.toggle("active");
+			});
+		var _allCaretDown = this.parentElement.parentElement.querySelectorAll(".caret-down");
+			_allCaretDown.forEach(function(item){
+				item.classList.toggle("caret-down");
+			});
+	
+	}else if(this.parentElement.parentElement.classList.contains('active')){
+		var _li = Array.from(this.parentElement.parentElement.children);
+		_li.forEach(function(item){
+			if(item.classList.contains('active')){
+				var _activeChildren = item.querySelectorAll(".active");
+				_activeChildren.forEach(function(item_1){
+					item_1.classList.toggle("active");
+				})
+				var _activeLink = item.querySelectorAll(".caret-down");
+				_activeLink.forEach(function(item){
+					item.classList.toggle("caret-down");
+				})
+			}
+		});
+	} 
+		this.parentElement.querySelector(".nested").classList.toggle("active");
+		this.parentElement.classList.toggle("active");
+		this.classList.toggle("caret-down");
+	}
+
+  });
+}
+</script>
+
+</body>
+</html>
