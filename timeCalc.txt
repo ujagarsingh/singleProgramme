@@ -1,4 +1,4 @@
-[
+var detailed_data = [
          {
            "id": "1",
            "class_name": "LKG",
@@ -158,6 +158,28 @@
            ]
          }
        ]
+       
+console.log(detailed_data)
+var classdata = [];
+var counter = 0;
+
+const _detailed_data = detailed_data.map((item)=>{
+	
+	const _class_id = {class_id : item.id, class_name :item.class_name, class_name_portal : item.lass_name_portal}
+	
+		const _exam_id = item.exams.map((item)=>{
+			
+			const _exams_id = {exam_id : item.id, exam_name : item.exam_name, exam_priority : item.exam_priority}
+			
+			const _sub_id = item.subject.map((item)=>{
+			
+			  classdata[counter] = {..._exams_id, ..._class_id, sub_id : item.id, sub_name : item.sub_name, max_marks : item.max_marks}
+			  counter++;
+			})
+		})
+
+})
+console.log(classdata)
 var date1 = new Date("Fri Feb 15 2019 16:44:35 GMT+0530 (India Standard Time)");
 var date2 = new Date("Fri Feb 15 2019 16:54:35 GMT+0530 (India Standard Time)");
 var timeDiff = Math.abs(date2.getTime() - date1.getTime());
