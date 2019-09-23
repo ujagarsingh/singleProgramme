@@ -1,3 +1,174 @@
+{
+  "classes": [
+    {
+      "class_name": "first",
+      "sudents": [
+        {
+          "stu_enrollment_number": "101",
+          "stu_name": "xyz singh",
+          "stu_father": "abc singh",
+          "exams": [
+            {
+              "exam_name": "first test",
+              "subject": [
+                {
+                  "sub_name": "hindi",
+                  "sub_type": "1",
+                  "max_marks": "10",
+                  "marks_obtain": "8"
+                },
+                {
+                  "sub_name": "English",
+                  "sub_type": "2",
+                  "max_marks": "10",
+                  "marks_obtain": "8",
+                  "sub_subject": [
+                    {
+                      "sub_name": "english A ",
+                      "sub_type": "1",
+                      "max_marks": "10",
+                      "max_obtain": "8"
+                    },
+                    {
+                      "sub_name": "english B",
+                      "sub_type": "1",
+                      "max_marks": "10",
+                      "max_obtain": "8"
+                    }
+                  ]
+                },
+                {
+                  "sub_name": "math",
+                  "sub_type": "1",
+                  "max_marks": "20",
+                  "marks_obtain": "18"
+                }
+              ]
+            },
+            {
+              "exam_name": "second test",
+              "subject": [
+                {
+                  "sub_name": "hindi",
+                  "sub_type": "1",
+                  "max_marks": "10",
+                  "marks_obtain": "8"
+                },
+                {
+                  "sub_name": "English",
+                  "sub_type": "2",
+                  "max_marks": "10",
+                  "marks_obtain": "8",
+                  "sub_subject": [
+                    {
+                      "sub_name": "english A ",
+                      "sub_type": "1",
+                      "max_marks": "10",
+                      "max_obtain": "8"
+                    },
+                    {
+                      "sub_name": "english B",
+                      "sub_type": "1",
+                      "max_marks": "10",
+                      "max_obtain": "8"
+                    }
+                  ]
+                },
+                {
+                  "sub_name": "math",
+                  "sub_type": "1",
+                  "max_marks": "20",
+                  "marks_obtain": "18"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "stu_enrollment_number": "102",
+          "stu_name": "kpy singh",
+          "stu_father": "lkm singh",
+          "exams": [
+            {
+              "exam_name": "first test",
+              "subject": [
+                {
+                  "sub_name": "hindi",
+                  "sub_type": "1",
+                  "max_marks": "10",
+                  "marks_obtain": "8"
+                },
+                {
+                  "sub_name": "English",
+                  "sub_type": "2",
+                  "max_marks": "10",
+                  "marks_obtain": "8",
+                  "sub_subject": [
+                    {
+                      "sub_name": "english A ",
+                      "sub_type": "1",
+                      "max_marks": "10",
+                      "max_obtain": "8"
+                    },
+                    {
+                      "sub_name": "english B",
+                      "sub_type": "1",
+                      "max_marks": "10",
+                      "max_obtain": "8"
+                    }
+                  ]
+                },
+                {
+                  "sub_name": "math",
+                  "sub_type": "1",
+                  "max_marks": "20",
+                  "marks_obtain": "18"
+                }
+              ]
+            },
+            {
+              "exam_name": "second test",
+              "subject": [
+                {
+                  "sub_name": "hindi",
+                  "sub_type": "1",
+                  "max_marks": "10",
+                  "marks_obtain": "8"
+                },
+                {
+                  "sub_name": "English",
+                  "sub_type": "2",
+                  "max_marks": "10",
+                  "marks_obtain": "8",
+                  "sub_subject": [
+                    {
+                      "sub_name": "english A ",
+                      "sub_type": "1",
+                      "max_marks": "10",
+                      "max_obtain": "8"
+                    },
+                    {
+                      "sub_name": "english B",
+                      "sub_type": "1",
+                      "max_marks": "10",
+                      "max_obtain": "8"
+                    }
+                  ]
+                },
+                {
+                  "sub_name": "math",
+                  "sub_type": "1",
+                  "max_marks": "20",
+                  "marks_obtain": "18"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
 var detailed_data = [
          {
            "id": "1",
