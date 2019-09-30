@@ -1,394 +1,79 @@
-import React, { Component } from 'react';
-import { NavLink } from 'react-router-dom';
-import { loadProgressBar } from 'axios-progress-bar';
-import axios from 'axios';
-import Alert from 'react-s-alert';
-import { confirmAlert } from 'react-confirm-alert';
-import { Helmet } from "react-helmet";
-import { HOST_URL } from '../includes/api-config';
-const GET_CLASSES = `http://localhost/schooloffice/api/classes/read.php`;
-const CREATE_SUBJECT = `http://localhost/schooloffice/api/subject/create.php`;
-const READ_SUBJECTS = `http://localhost/schooloffice/api/subject/read_subjects_of_class.php`;
-const GET_SUBJECT_LAVEL = `http://localhost/schooloffice/api/subject/create.php`;
+I am a new student in php pdo. and I want to create a student report card. I want to fetch data from mySql. and showing into a table. but there are some issue for creating a json from mySql data. because i was not able to bifurcate in nested json data. I am getting data from mysql. like below table. 
 
-class AddSubject extends Component {
-  state = {
-    classes: [],
-    class_id: 0,
-    sub_lavel: [{ sub_lavel: "1" }, { sub_lavel: "2" }],
-    existsubject: [{ sub_name: "", sub_lavel: "1" }],
-    subjectnames: [{ sub_name: "", sub_lavel: "1", sub_p: [] }],
-    errorMessages: '',
-    successMessages: ''
-  }
-  handleSubNameHandler = index => evt => {
-    const _newItem = this.state.subjectnames.map((item, sidx) => {
-      if (index !== sidx) return item;
-      return { ...item, sub_name: evt.target.value, sub_lavel: "1" };
-    });
-    this.setState({ subjectnames: _newItem });
-  };
-  handleSubLavelHandler = index => evt => {
-    const _newItem = this.state.subjectnames.map((item, sidx) => {
-      if (index !== sidx) return item;
-      if (evt.target.value == 2) {
-        return {
-          ...item,
-          sub_lavel: evt.target.value,
-          sub_p: [{ sub_name: "", sub_lavel: "1", sub_p: [] }]
-        };
-      } else {
-        return {
-          ...item,
-          sub_lavel: evt.target.value,
-          sub_p: []
-        };
-      }
-    });
-    this.setState({ subjectnames: _newItem });
-  };
-  handleAddSubject = () => {
-    this.setState({
-      subjectnames: this.state.subjectnames.concat([{ sub_name: "", sub_lavel: "1", sub_p: [] }])
-    });
-  };
-  handleRemoveSubject = index => () => {
-    if (this.state.subjectnames.length > 1) {
-      this.setState({
-        subjectnames: this.state.subjectnames.filter((s, sidx) => index !== sidx)
-      })
+    |----------|------------|---------|---------|----------|--------------|
+    | class_id | student_id | exam_id |  sub_id | max_mark | marks_obtain |
+    |----------|------------|---------|---------|----------|--------------|
+    |    5     |     101    |    11   |    51   |    100   |      85      |
+    |    5     |     101    |    11   |    52   |    100   |      78      |
+    |    5     |     101    |    11   |    53   |    100   |      65      |
+    |    5     |     101    |    12   |    51   |     50   |      45      |
+    |    5     |     101    |    12   |    52   |     50   |      35      |
+    |    5     |     101    |    12   |    53   |     50   |      49      |
+    |----------|------------|---------|---------|----------|--------------|
+
+and i want to json like :
+
+    {
+      "class_id": '5',
+      "students": [
+        {
+          "sutdent_id": 101,
+          "exam": [
+            {
+              "exam_id": 11,
+              "subject": [
+                {
+                  "subject_id": 51,
+                  "max_marks": 100,
+                  "marks_obtain": 85
+                },
+                {
+                  "subject_id": 52,
+                  "max_marks": 100,
+                  "marks_obtain": 78
+                },
+                {
+                  "subject_id": 53,
+                  "max_marks": 100,
+                  "marks_obtain": 65
+                }
+              ]
+            },
+            {
+              "exam_id": 12,
+              ....
+            }
+          ]
+        },
+        {
+          "student_id": 102,
+          ....
+        },
+        {
+          "student_id": 103,
+          ....
+        }
+      ]
     }
-  };
-  getSectedClassHandler = (event) => {
-    const _class_id = event.target.value;
-    this.subjectsClasswise(_class_id);
-  }
-  // get subjects according to class
-  subjectsClasswise = (_class_id) => {
-    this.setState({
-      class_id: _class_id,
-      existsubject: '',
-    }, () => {
-      loadProgressBar();
-      axios.get(READ_SUBJECTS + `?id=` + _class_id)
-        .then(res => {
-          const getRes = res.data;
-          (getRes.message == undefined) ?
-            this.setState({
-              existsubject: getRes,
-              subjectnames: getRes,
-            }) :
-            this.setState({
-              errorMessages: getRes.message,
-              subjectnames: [{ sub_name: "", sub_lavel: "1", sub_p: [] }]
-            })
-          //console.log(this.state.classes);
-        }).catch((error) => {
-          // error
-        })
-    })
-  }
-  componentDidMount() {
-    loadProgressBar();
-    axios.get(GET_CLASSES)
-      .then(res => {
-        const getRes = res.data;
-        this.setState({
-          classes: getRes,
-          errorMessages: getRes.message
-        });
-        //console.log(this.state.classes);
-      }).catch((error) => {
-        // error
-      })
-  };
-  submitHandler = e => {
-    loadProgressBar();
-    const _state = this.state;
-    e.preventDefault();
-    const _subject = _state.subjectnames.filter((item, index) => {
-      return item.sub_name.length > 0
-    })
-    const obj = {
-      class_id: _state.class_id,
-      sub_name: _subject
-    };
-    console.log(JSON.stringify(obj));
-    debugger
-    axios.post(CREATE_SUBJECT, obj)
-      .then(res => {
-        const getRes = res.data;
-        console.log(getRes)
-        Alert.success(getRes.message, {
-          position: 'bottom-right',
-          effect: 'jelly',
-          timeout: 5000,
-        });
-        this.setState({
-          class_id: 0,
-          subjectnames: [{ sub_name: "" }]
-        })
-      }).catch((error) => {
-        //this.setState({ errorMessages: error });
-      })
-  };
-  render() {
-    const _state = this.state;
-    console.log(_state);
-    return (
-      <div className="page-content">
-        <div className="page-bar">
-          <div className="page-title-breadcrumb">
-            <div className=" pull-left">
-              <div className="page-title">Add Subject</div>
-            </div>
-            <ol className="breadcrumb page-breadcrumb pull-right">
-              <li><i className="fa fa-home" />&nbsp;<NavLink className="parent-item" to="dashboard">Dashboard</NavLink>&nbsp;<i className="fa fa-angle-right" />
-              </li>
-              <li><NavLink className="parent-item" to="">Subject</NavLink>&nbsp;<i className="fa fa-angle-right" />
-              </li>
-              <li className="active">Add Subject</li>
-            </ol>
-          </div>
-        </div>
-        <div className="card card-box">
-          <div className="card-body">
-            <div className="table-scrollable">
-              <div className="col-md-12 col-sm-12">
-                <div className="card card-box">
-                  <div className="card-body" id="bar-parent">
-                    <form className="form-horizontal" onSubmit={this.submitHandler}>
-                      <div className="form-body">
-                        <div className="form-group row">
-                          <label className="control-label col-md-3">Class
-                        <span className="required"> * </span>
-                          </label>
-                          <div className="col-md-5">
-                            <select className="form-control" name="select"
-                              value={_state.class_id}
-                              onChange={this.getSectedClassHandler}>
-                              <option value="">Select...</option>
-                              {_state.classes.map((option, index) => {
-                                return (
-                                  <option key={index}
-                                    value={option.id}>
-                                    {option.class_name} [{option.class_name_portal}]
-                              </option>
-                                )
-                              })}
-                            </select>
-                          </div>
-                        </div>
-                        <div className="form-group row">
-                          <label className="control-label col-md-3">Subject Name
-                        <span className="required"> * </span>
-                          </label>
-                          <div className="col-md-6">
-                            {(_state.subjectnames.length > 0) ? _state.subjectnames.map((item, index) => (
-                              <div className="form-group" key={index}>
-                                <div className="form-group">
-                                  <div className="input-group mb-3">
-                                    <div className="input-group-prepend">
-                                      <button
-                                        type="button"
-                                        className="btn btn-danger"
-                                        onClick={this.handleRemoveSubject(index)} >
-                                        <i className="fa fa-minus"></i>
-                                      </button>
-                                    </div>
-                                    <input
-                                      type="text"
-                                      className="form-control"
-                                      placeholder={`#${index + 1} Subject Name`}
-                                      value={item.sub_name}
-                                      onChange={this.handleSubNameHandler(index)}
-                                    />
-                                    <select className="form-control" name="sub_lavel"
-                                      value={item.sub_lavel}
-                                      onChange={this.handleSubLavelHandler(index)}>
-                                      {_state.sub_lavel.map((option, index) => {
-                                        return (
-                                          <option key={index}>
-                                            {option.sub_lavel}
-                                          </option>
-                                        )
-                                      })}
-                                    </select>
-                                    <div className="input-group-append">
-                                      <button
-                                        type="button"
-                                        className="btn btn-info"
-                                        onClick={this.handleAddSubject}
-                                      >
-                                        <i className="fa fa-plus"></i>
-                                      </button>
-                                    </div>
-                                  </div>
-                                </div>
-                                {(item.sub_p.length > 0) ?
-                                  <AddSubjectLavel 
-                                  handleSubNameHandler={this.handleSubNameHandler}
-                                  />
-                                  : null}
-                              </div>
-                            )) : null}
-                          </div>
-                        </div>
-                        <div className="form-actions">
-                          <div className="row">
-                            <div className="offset-md-3 col-md-9">
-                              <button type="submit" className="btn btn-info m-r-20">Submit</button>
-                              <NavLink to="/all_subject" className="btn btn-default">Cancel</NavLink>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </form>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    )
-  }
-}
-export default AddSubject;
 
+please help me about this solution. how to bifurcate when student_id, exam_id, and class_id is already exist in jsondata.
 
-class AddSubjectLavel extends Component {
-  state = {
-    class_id: '', // 
-    subjects: [], // lavel 1 subject of class
+my code is :
 
-    sub_id: 0,
-    sub_lavel: [{ sub_lavel: "1" }, { sub_lavel: "2" }],
-    existsubject: [{ sub_name: "", sub_lavel: "1" }],
-    subjectnames: [{ sub_name: "", sub_lavel: "1", sub_p: [] }],
-    errorMessages: '',
-    successMessages: ''
-  }
-  handleSubNameHandler = index => evt => {
-    const _newItem = this.state.subjectnames.map((item, sidx) => {
-      if (index !== sidx) return item;
-      return { ...item, sub_name: evt.target.value, sub_lavel: "1" };
-    });
-
-    this.setState({ subjectnames: _newItem });
-  };
-  /*
-  handleSubLavelHandler = index => evt => {
-    const _newItem = this.state.subjectnames.map((item, sidx) => {
-      if (index !== sidx) return item;
-      return { ...item, sub_lavel: evt.target.value };
-    });
-
-    this.setState({ subjectnames: _newItem });
-  };*/
-  handleSubLavelHandler = index => evt => {
-    const _newItem = this.state.subjectnames.map((item, sidx) => {
-      if (index !== sidx) return item;
-      if (evt.target.value == 2) {
-        return {
-          ...item,
-          sub_lavel: evt.target.value,
-          sub_p: [{ sub_name: "", sub_lavel: "1", sub_p: [] }]
-        };
-      } else {
-        return {
-          ...item,
-          sub_lavel: evt.target.value,
-          sub_p: []
-        };
-      }
-    });
-    this.setState({ subjectnames: _newItem });
-  };
-  handleAddSubject = () => {
-    this.setState({
-      subjectnames: this.state.subjectnames.concat([{ sub_name: "", sub_lavel: "1", sub_p: [] }])
-    });
-  };
-  handleRemoveSubject = index => () => {
-    if (this.state.subjectnames.length > 1) {
-      this.setState({
-        subjectnames: this.state.subjectnames.filter((s, sidx) => index !== sidx)
-      })
-    }
-  };
-
-  componentDidMount() {
-    loadProgressBar();
-    axios.get(GET_SUBJECT_LAVEL)
-      .then(res => {
-        const getRes = res.data;
-        this.setState({
-          classes: getRes,
-          errorMessages: getRes.message
-        });
-        //console.log(this.state.classes);
-      }).catch((error) => {
-        // error
-      })
-  };
-  render() {
-    const _state = this.state;
-    console.log('PART ------', _state);
-    return (
-      <div className="form-group row">
-        <label className="control-label col-md-2">Part
-                        <span className="required"> * </span>
-        </label>
-        <div className="col-md-10">
-          {(_state.subjectnames.length > 0) ? _state.subjectnames.map((item, index) => (
-            <div className="form-group" key={index}>
-              <div className="form-group">
-                <div className="input-group mb-3">
-                  <div className="input-group-prepend">
-                    <button
-                      type="button"
-                      className="btn btn-danger"
-                      onClick={this.handleRemoveSubject(index)} >
-                      <i className="fa fa-minus"></i>
-                    </button>
-                  </div>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder={`#${index + 1} Part`}
-                    value={item.sub_name}
-                    onChange={this.handleSubNameHandler(index)}
-                  />
-                  <select className="form-control" name="sub_lavel"
-                    value={item.sub_lavel}
-                    onChange={this.handleSubLavelHandler(index)}>
-                    {_state.sub_lavel.map((option, index) => {
-                      return (
-                        <option key={index}>
-                          {option.sub_lavel}
-                        </option>
-                      )
-                    })}
-                  </select>
-                  <div className="input-group-append">
-                    <button
-                      type="button"
-                      className="btn btn-info"
-                      onClick={this.handleAddSubject}
-                    >
-                      <i className="fa fa-plus"></i>
-                    </button>
-                  </div>
-                </div>
-              </div>
-              {(item.sub_p.length > 0) ?
-                <AddSubjectLavel />
-                : null}
-            </div>
-        )) : null}
-        </div>
-      </div>
-    )
-  }
-}
+    $stmt_c = $Item->function_Of_Getting_Data();
+    $num_c = $stmt_c->rowCount();
+        if ($num_c > 0) {
+           $Class_arr = array();
+           while ($row = $stmt_c -> fetch(PDO:: FETCH_ASSOC)) {
+              extract($row);
+        		$Class_info = array();
+        		$Class_info['class_id'] = $row['class_id']; 
+        		$Class_info['student']['student_id'] = $row['student_id']; 
+        		$Class_info['student']['exam']['exam_id'] = $row['exam_id']; 
+        		$Class_info['student']['exam']['subject']['sub_id'] = $row['sub_id']; 
+        		$Class_info['student']['exam']['subject']['max_marks'] = $row['max_marks']; 
+        		$Class_info['student']['exam']['subject']['marks_obtain'] = $row['marks_obtain']; 
+        		$Class_arr[] =  $Class_info;
+           }
+           echo json_encode($Class_arr);
+        }
