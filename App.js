@@ -1,116 +1,112 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
-import './App.css';
-import { withAlert } from 'react-alert'
+import Sidebar from './Sidebar';
+import ExcelReader from './ExcelReader';
+import SelectBox from './SelectBox';
+//import { Chart } from 'react-charts'
+import Chart from 'react-google-charts';
 
-import  CheckBox  from './checkbox';
-nums: {
-  bool: {
-    TRUE: true;
-    FALSE: false;
-  }
-  children: [
-    { value: 1, label: "On its way" },
-    { value: 2, label: "Newborn to 2 years" },
-    { value: 4, label: "2 to 6 years" },
-    { value: 8, label: "7 to 11 years" },
-    { value: 16, label: "12 to 15 years" },
-    { value: 32, label: "16 to 18 years" },
-    { value: 64, label: "19 and older" }
-  ];
-}
-class App extends Component {
-  state={
-    counter : 1,
-	radioOpt : 'option1',
-	fruites: [
-        {id: 1, value: "banana", isChecked: false},
-        {id: 2, value: "apple", isChecked: false},
-        {id: 3, value: "mango", isChecked: false},
-        {id: 4, value: "grap", isChecked: false}
-      ]
-	
-  }
-  incCounter = () => {
-    this.setState({
-      counter : this.state.counter + 1
-    })
-  }
-  handleOptionChange = ((event) => {
-	this.setState({
-		radioOpt: event.target.value
-	  });
-  })
+class MyChart extends Component {
+    state = {
+        selectnumber: '',
+        dataObj: [],
+        data: [
+            {
+                label: 'Series 1',
+                data: [[0, 1], [1, 2], [2, 4], [3, 2], [4, 7]]
+            },
+            {
+                label: 'Series 2',
+                data: [[0, 3], [1, 1], [2, 5], [3, 6], [4, 4]]
+            }
+        ],
+        axes: [
+            { primary: true, type: 'linear', position: 'bottom' },
+            { type: 'linear', position: 'left' }
+        ],
+    }
 
-  
-  handleFormSubmit = ((event) =>{
-	  event.preventDefault();
-	  console.log(this.state)
-  } )
+    render() {
+        return (
+            <div className="container">
+                <div className="row">
+                    <div className="col-sm-4">
+                        <Sidebar />
+                    </div>
+                    <div className="col-sm-8">
+                        <h2>Chart </h2>
 
-  handleChange = ((key) => {
-    return function(e) {
-      var state = {};
-      state[key] = e.target.value;
-      this.setState(state);
-    }.bind(this);
-  })
-  
-  render() {
-    return (
-      <div className="App">
-         <h1>Welcome in MyApp</h1>
-         <h2>{this.state.counter}</h2>
-         <button onClick={this.incCounter}>+</button>
-         {/* <button
-          onClick={() => {
-            this.props.alert.success('Oh look, an alert!')
-          }}
-        >
-          Show Alert
-        </button> */}
-		<hr />
-		<form onSubmit={this.handleFormSubmit}>
-    <div className="radio">
-      <label>
-        <input type="radio" value="option1" 
-			  checked={this.state.radioOpt === 'option1'} 
-			  onChange={this.handleOptionChange} />
-        Option 1
-      </label>
-    </div>
-    <div className="radio">
-      <label>
-        <input type="radio" value="option2" 
-			  checked={this.state.radioOpt === 'option2'} 
-			  onChange={this.handleOptionChange} />
-        Option 2
-      </label>
-    </div>
-    <div className="checkbox">
-      <label>
-        <input type="checkbox" value="option3" 
-			  checked={this.state.radioOpt === 'option3'} 
-			  onChange={this.handleOptionChange} />
-        Option 3
-      </label>
-    </div>
-	<h2> radioOpt : {this.state.radioOpt}</h2>
-	
-  <CheckBoxGroup
-  formGroup={this.enums.bool.TRUE}
-  name="children"
-  label="Do you have children? If so, check all that apply."
-  state={this.state}
-  handleChange={this.handleChange("children")}
-  items={this.enums.children}
-/>
-	 
-	<button type="submit">Submit</button>
-  </form>
-      </div>
-    );
-  }
+
+                        <Chart
+                            width={900}
+                            height={500}
+                            chartType="ColumnChart"
+                            loader={<div>Loading Chart</div>}
+                            data={[
+                                ['City', '2010 Population', '2000 Population'],
+                                ['New York City, NY', 8175000, 8008000],
+                                ['Los Angeles, CA', 3792000, 3694000],
+                                ['Chicago, IL', 2695000, 2896000],
+                                ['Houston, TX', 2099000, 1953000],
+                                ['Philadelphia, PA', 1526000, 1517000],
+                            ]}
+                            options={{
+                                legend: { position: 'bottom', alignment: 'middle' },
+                                title: 'Population of Largest U.S. Cities',
+                                chartArea: { width: '100%' },
+                                hAxis: {
+                                    title: 'Total Population',
+                                    minValue: 0,
+                                },
+                                vAxis: {
+                                    title: 'City',
+                                },
+                            }}
+                            legendToggle
+                        />
+                        <h2>Chart </h2>
+                        <Chart
+                            width={600}
+                            height={300}
+                            chartType="Line"
+                            loader={<div>Loading Chart</div>}
+                            data={[
+                                [
+                                    'Day',
+                                    'Guardians of the Galaxy',
+                                    'The Avengers',
+                                    'Transformers: Age of Extinction',
+                                ],
+                                [1, 37.8, 80.8, 41.8],
+                                [2, 30.9, 69.5, 32.4],
+                                [3, 25.4, 57, 25.7],
+                                [4, 11.7, 18.8, 10.5],
+                                [5, 11.9, 17.6, 10.4],
+                                [6, 8.8, 13.6, 7.7],
+                                [7, 7.6, 12.3, 9.6],
+                                [8, 12.3, 29.2, 10.6],
+                                [9, 16.9, 42.9, 14.8],
+                                [10, 12.8, 30.9, 11.6],
+                                [11, 5.3, 7.9, 4.7],
+                                [12, 6.6, 8.4, 5.2],
+                                [13, 4.8, 6.3, 3.6],
+                                [14, 4.2, 6.2, 3.4],
+                            ]}
+                            options={{
+                                chart: {
+                                    title: 'Box Office Earnings in First Two Weeks of Opening',
+                                    subtitle: 'in millions of dollars (USD)',
+                                },
+                            }}
+                        />
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        );
+    }
 }
 
-export default withAlert(App);
+export default MyChart;
