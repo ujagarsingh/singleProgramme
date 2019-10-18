@@ -1,5 +1,3 @@
-https://goshakkk.name/different-mobile-desktop-tablet-layouts-react/
-https://codesandbox.io/s/y2453lj5xj?view=editor
 function sidebarFunction() {
             var toggler = document.getElementsByClassName("nav-toggle");
             var i;
