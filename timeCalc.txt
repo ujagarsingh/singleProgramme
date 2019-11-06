@@ -1,3 +1,12 @@
+https://149363845.v2.pressablecdn.com/wp-content/uploads/2017/01/default-avatar_female.png
+
+https://www.briarwoodinsurances.com/wp-content/uploads/2016/06/avatar5.png
+
+https://oceanbluesoftware.co.uk/wp-content/uploads/2016/12/profile-photo.png
+
+http://comunidadpnacc.com/wp-content/uploads/2019/03/profile_mujer-1-1024x1024.jpg
+
+
 var date1 = new Date("Fri Feb 15 2019 16:44:35 GMT+0530 (India Standard Time)");
 var date2 = new Date("Fri Feb 15 2019 16:54:35 GMT+0530 (India Standard Time)");
 var timeDiff = Math.abs(date2.getTime() - date1.getTime());
