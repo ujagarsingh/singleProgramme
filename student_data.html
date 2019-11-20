@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html class="h-100 d-flex" lang="en"><head>
+    <title>Bootstrap Example</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css">
+    <script
+      src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js"></script>
+  </head>
+
+  <body class="h-100 w-100 m-0 p-0">
+    <!--
+    <div class="container h-100">
+      <div class="d-flex mb-3 flex-column h-100">
+        <div class="p-2 bg-success">P</div>
+        <div class="p-2 flex-grow-1 bg-primary">Q</div>
+        <div class="p-2 bg-info">R</div>
+      </div>
+      <div class="d-flex mb-3 flex-column h-100">
+        <div class="p-2 bg-success">P</div>
+        <div class="p-2 flex-grow-1 bg-primary">Q</div>
+        <div class="p-2 bg-info">R</div>
+      </div>
+    </div>
+  -->
+    <script>
+var _cat = ['monthly', 'convence', 'registration'];
+var _data = [
+  {
+  "id" : '415',
+  "monthly" : 'July',
+  "convence" : 'july',
+  "registration" : ''
+},
+{
+  "id" : '415',
+  "monthly" : 'Auguest',
+  "convence" : 'Auguest',
+  "registration" : 'oneTime'
+},
+{
+  "id" : '415',
+  "monthly" : 'September',
+  "convence" : '',
+  "registration" : ''
+},
+{
+  "id" : '415',
+  "monthly" : 'Octomber',
+  "convence" : 'Octomber',
+  "registration" : ''
+},
+{
+  "id" : '415',
+  "monthly" : '',
+  "convence" : 'November',
+  "registration" : ''
+}
+];
+var i = 0;
+var _newData = [];
+while (i < _data.length) {
+  //console.log(_data[i]);
+  let _keys = Object.keys(_data[i]);
+
+  _keys.forEach(element => {
+    _newData['id'] = _data[0].id;
+    _cat.forEach(cat_elem => {
+      if(element === cat_elem){
+        let temp_value = [];
+        let _key = cat_elem;
+        let _value = _data[i][_key];
+
+        if(_value !== ""){
+          temp_value.push(_value);
+        }
+
+          if(i > 0){
+          _newData[_key] = _newData[_key].concat(temp_value);
+          } else {
+          _newData[_key] = temp_value; 
+          }
+
+      }
+    });
+  });
+  i++;
+};
+console.log(_newData);
+var finalData = {
+  "id" : '415',
+  "monthly" : ['July', 'Auguest', 'September'],
+  "convence" : ['July', 'Auguest', 'Octomber', 'November'],
+  "registration" : 'oneTime'
+};
+
+//console.log(finalData);
+</script>
+  </body>
+</html>
