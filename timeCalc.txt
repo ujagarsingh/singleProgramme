@@ -76,3 +76,9 @@ https://goshakkk.name/different-mobile-desktop-tablet-layouts-react/
 
 // Lazy Loding
 https://codesandbox.io/s/y2453lj5xj?view=editor
+
+// Broken Image
+https://stackoverflow.com/questions/92720/jquery-javascript-to-replace-broken-images
+
+// Back Button
+https://stackoverflow.com/questions/47092384/use-javascript-jquery-detect-android-back-button
