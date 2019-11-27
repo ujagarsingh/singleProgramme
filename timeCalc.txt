@@ -82,3 +82,6 @@ https://stackoverflow.com/questions/92720/jquery-javascript-to-replace-broken-im
 
 // Back Button
 https://stackoverflow.com/questions/47092384/use-javascript-jquery-detect-android-back-button
+
+// image fallback
+https://codesandbox.io/s/jjmmpp8jm5
