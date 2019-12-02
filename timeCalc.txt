@@ -53,6 +53,9 @@ https://stackoverflow.com/questions/1990352/mysql-multiple-left-joins
 // excel to json
 https://stackblitz.com/edit/react-excel-to-json-parser
 
+// Table to xlsx
+https://blog.bitsrc.io/exporting-data-to-excel-with-react-6943d7775a92
+
 // data-grid
 https://adazzle.github.io/react-data-grid/docs/quick-start
 
@@ -60,7 +63,8 @@ https://adazzle.github.io/react-data-grid/docs/quick-start
 https://www.npmjs.com/package/react-image-crop#example
 
 // image gallery
-https://peterpalau.github.io/react-bnb-gallery/
+//https://peterpalau.github.io/react-bnb-gallery/
+https://github.com/neptunian/react-photo-gallery
 
 // alert
 https://www.npmjs.com/package/react-confirm-alert
