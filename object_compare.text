@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1,
+      shrink-to-fit=no">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <title>Right Menu GST</title>
+  </head>
+  <body>
+
+    <!-- Optional JavaScript -->
+    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+      integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+      crossorigin="anonymous"></script>
+    <script>
+	var _mData = [{"Jan":"5", "Feb":"8"}];
+	var _oldData = [{"Com_id":"2","Name":"abc","Jan":"","Feb":""},{"Com_id":"2","Name":"efg","Jan":""},{"Com_id":"2","Name":"hij","Jan":""},{"Com_id":"2","Name":"kal","Jan":"5"},{"Com_id":"2","Name":"mno","Jan":""}];
+	var _newData = [{"Com_id":"2","Name":"abc","Jan":"4","Feb":"4"},{"Com_id":"3","Name":"efg","Jan":"3"},{"Com_id":"2","Name":"hij","Jan":"5"},{"Com_id":"2","Name":"kal","Jan":"3"},{"Com_id":"2","Name":"mno","Jan":"4"}];
+	var _finalData = [];
+	
+	
+	function validate(oldData, newData){
+    let _error = '';
+		const _com_id = oldData[0]['Com_id'];
+
+		const _old_lenth = oldData.length;
+		const _new_lenth = newData.length;
+    let isError = false;
+    
+    if(_old_lenth !== _new_lenth){
+       alert('Lenth are Wrong');
+       return false;
+    } 
+    
+    for(var x = 0; x<_old_lenth ; x++){
+    const _old_keys = Object.keys(oldData[x]);
+		const _new_keys = Object.keys(newData[x]);
+    const _inx = x+1;
+    let _currentData = {};
+
+      if (JSON.stringify(_old_keys) !== JSON.stringify(_new_keys)){
+        alert('Keys are Wrong in obj >__ '+ _inx) ;
+        isError = true;
+        return false;
+      } else {
+        const _oldk = _old_keys.length;
+        for(var k = 0; k<_oldk ; k++){
+
+          const _filter_key = Object.keys(_mData[0]);
+          if(_filter_key.includes(_old_keys[k])){
+
+            if(_newData[x][_old_keys[k]] <= _mData[0][_old_keys[k]]){
+              _currentData[_old_keys[k]] = _newData[x][_old_keys[k]];
+            } else {
+              alert('Values are Wrong in obj >__ '+ _inx) ;
+              isError = true;
+              return false;
+            }
+          } else {
+          _currentData[_old_keys[k]] = _newData[x][_old_keys[k]];
+          }
+
+        }
+        _finalData.push(_currentData);
+      }
+
+    }
+    if(!isError){
+      alert('Every Thing Ok!!!');
+    }
+    console.log(_finalData);
+	};
+	
+	validate(_oldData, _newData);
+	</script>
+  </body>
+</html>
