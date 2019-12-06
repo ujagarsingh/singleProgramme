@@ -90,3 +90,4 @@ https://codesandbox.io/s/jjmmpp8jm5
 // Update Multiple
 https://stackoverflow.com/questions/29327128/mysql-if-row-exists-update-else-insert
 https://stackoverflow.com/questions/2714587/mysql-on-duplicate-key-update-for-multiple-rows-insert-in-single-query
+https://stackoverflow.com/questions/14383503/on-duplicate-key-update-same-as-insert
