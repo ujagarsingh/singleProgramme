@@ -96,3 +96,6 @@ https://stackoverflow.com/questions/14383503/on-duplicate-key-update-same-as-ins
 
 // validation
 https://github.com/learnetto/react-form-validation-demo
+
+// Encript/Dcript
+https://stackoverflow.com/questions/23889885/php-how-encode-decode-text-with-key/23889971
