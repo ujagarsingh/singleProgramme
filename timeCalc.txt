@@ -99,3 +99,11 @@ https://github.com/learnetto/react-form-validation-demo
 
 // Encript/Dcript
 https://stackoverflow.com/questions/23889885/php-how-encode-decode-text-with-key/23889971
+
+// Theme layouts
+https://p.w3layouts.com/demos/tuition/web/
+https://p.w3layouts.com/demos/july-2016/02-07-2016/studies_plus/web/index.html
+https://p.w3layouts.com/demos/refinement/web/index.html
+
+// CountDown
+https://codepen.io/jurekbarth/pen/pgYGBm
