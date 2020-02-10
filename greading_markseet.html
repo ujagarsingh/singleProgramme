@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<body>
+<script>
+	 var grid_data_1 = [{"grade" : 'A', "min_marks" : 51, "max_marks" : 100}, {"grade" : 'B', "min_marks" : 0, "max_marks" : 50}];
+	 var grid_data_2 = [{"grade" : 'A', "min_marks" : 61, "max_marks" : 100}, {"grade" : 'B', "min_marks" : 41, "max_marks" : 60}, 
+						{"grade" : 'C', "min_marks" : 0, "max_marks" : 40}];
+	 var grid_data_3 = [{"grade" : 'A', "min_marks" : 76, "max_marks" : 100}, {"grade" : 'B', "min_marks" : 51, "max_marks" : 75}, 
+					 {"grade" : 'C', "min_marks" : 26, "max_marks" : 50}, {"grade" : 'D', "min_marks" : 0, "max_marks" : 25}];
+					 
+	let marks_obt = 20;
+	
+	function calc_grade(marks_obt, grid_data){
+		let grade_obt = '';
+		grid_data.forEach((item)=>{
+			if(marks_obt >= item.min_marks && marks_obt <= item.max_marks){
+			grade_obt = item.grade;
+			}
+		})
+		return grade_obt;
+	}
+	
+	const _result = calc_grade(marks_obt, grid_data_3);
+	
+	console.log(_result);
+	
+	
+</script>
+</body>
+</html> 
