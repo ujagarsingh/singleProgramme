@@ -111,6 +111,7 @@ class UploadExcel extends Component {
     })
     return _obj
   }
+  /*
   matchUpdatedStudent(data_1, data_2) {
     // getting data which is updated;
     const _obj = data_1.filter((online_item) => {
@@ -132,6 +133,34 @@ class UploadExcel extends Component {
             flag = false
           }
           //flag = false
+        }
+      })
+      if (flag) {
+        return online_item
+      }
+    })
+    console.log(_obj);
+    debugger
+    return _obj
+  }
+  */
+function matchUpdatedStudent(data_1, data_2) {
+    const _obj = data_1.filter((online_item) => {
+      let flag = false;
+      data_2.forEach((sofware_item) => {
+        if (online_item.admission_number == sofware_item.admission_number) {
+          if (
+            online_item.student_name !== sofware_item.student_name ||
+            online_item.father_name !== sofware_item.father_name ||
+            online_item.mother_name !== sofware_item.mother_name ||
+            online_item.studying_in_class !== sofware_item.studying_in_class ||
+            online_item.medium !== sofware_item.medium ||
+            online_item.admission_number !== sofware_item.admission_number ||
+            online_item.gender !== sofware_item.gender ||
+            online_item.getting_free_education !== sofware_item.getting_free_education
+          ) {
+            flag = true
+          }
         }
       })
       if (flag) {
