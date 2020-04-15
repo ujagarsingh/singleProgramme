@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Page Title</title>
+</head>
+
+<body>
+</body>
+<script>
+  //d/repo/saggst/src/gst/
+  var folder = "d:/kwork/code/gstr1";
+  var folder = "d:/kwork/code/gstr1";
+  var str = `import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
+import { Gstr01Component } from './gstr01.component';
+
+const routes: Routes = [
+  {
+    path : "",
+    component : Gstr01Component,
+    children : [
+      {
+        path : "client",
+        loadChildren: () => import('./gstr01-client/gstr01-client.module').then(mod => mod.Gstr01ClientModule)
+      },
+      {
+        path : "dashboard",
+        loadChildren: () => import('./gstr01-dashboard/gstr01-dashboard.module').then(mod => mod.Gstr01DashboardModule)
+      },
+      {
+        path : "fillform",
+        loadChildren: () => import('./gstr01-fillform/gstr01-fillform.module').then(mod => mod.Gstr01FillformModule)
+      },
+      {
+        path: 'receiver',
+        loadChildren: () => import('node_modules/genmaster/src/master/return-seller/return-seller.module').then(mod => mod.ReturnSellerModule),
+      },
+      {
+        path : "summary",
+        loadChildren: () => import('./gstr01-summary/gstr01-summary.module').then(mod => mod.Gstr01SummaryModule)
+      },
+      {
+        path : "reconciliation",
+        loadChildren: () => import('./gstr01-reconciliation/gstr01-reconciliation.module').then(mod => mod.Gstr01ReconciliationModule)
+      },
+      {
+        path : "sms",
+        loadChildren: () => import('../sms/sms.module').then(mod => mod.SmsModule) 
+      },
+      {
+        path : "email",
+        loadChildren: () => import('../email/email.module').then(mod => mod.EmailModule) 
+      },
+      {
+        path : "configuration",
+        loadChildren: () => import('../configuration/configuration.module').then(mod => mod.ConfigurationModule) 
+      }
+    ]
+  }
+];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule]
+})
+export class Gstr01RoutingModule { }`;
+
+  var jsonData = "";
+
+  function rm_first_elem(arrName) {
+    arrName.shift();
+    const str = arrName.join("");
+    return str;
+  }
+
+  function removeFromTill(full_str, rm_str) {
+    let str = "";
+    const bIndex = 0;
+    if (full_str.includes(rm_str)) {
+      const eIndex = full_str.indexOf(rm_str) + rm_str.length;
+      str = full_str.substr(0, bIndex) + full_str.substr(eIndex);
+    }
+    return str;
+  }
+
+  function childJsonCreator(json_str) {
+    let thisStr = json_str;
+    let ch_json = "";
+
+    const str_1 = thisStr.split(`loadChildren: () => import('`);
+    ch_json += str_1[0];
+    thisStr = removeFromTill(thisStr, `loadChildren: () => import('`);
+    const str_2 = thisStr.split(`')`);
+    ch_json += "link :" + str_2[0];
+    // make folder link using str_2[0] 
+    const link_str = str_2[0].split("/");
+    const folder_arr = folder.split("/");
+    let folder_name = "";
+    let link_name = "";
+
+    if (link_str[0] == ".") {
+
+      const new_folder = folder_arr.slice(0, folder_arr.length - 1); // remove first and last item of array
+      const join_folder = new_folder.join("/");                     // join rest array list for folder name
+
+      const link_arr = link_str.slice(1, link_str.length - 1); // remove first and last item of array
+      const join_link = link_arr.join("/");                     // join rest array list for folder name
+      link_name = join_folder + "/" + join_link;
+      
+    } else if (link_str[0] == "node_modules") {
+      const new_folder = folder_arr.slice(0, folder_arr.length - 2); // remove first and last item of array
+      const join_folder = new_folder.join("/");                     // join rest array list for folder name
+
+      const link_arr = link_str.slice(0, link_str.length - 1); // remove first and last item of array
+      const join_link = link_arr.join("/");                     // join rest array list for folder name
+      link_name = join_folder + "/" + join_link;
+    } else if (link_str[0] == "..") {
+      const new_folder = folder_arr.slice(0, folder_arr.length - 2); // remove first and last item of array
+      const join_folder = new_folder.join("/");                     // join rest array list for folder name
+
+      const link_arr = link_str.slice(1, link_str.length - 1); // remove first and last item of array
+      const join_link = link_arr.join("/");                     // join rest array list for folder name
+      link_name = join_folder + "/" + join_link;
+    } else {
+      const join_folder = folder_arr.join("/");                     // join rest array list for folder name
+      const join_link = link_str.join("/");                     // join rest array list for folder name
+      
+      link_name = join_folder + "/" + join_link;
+    }
+    console.log(link_name);
+
+    //
+    // folder functon for new child
+    //
+
+
+    // end //
+    thisStr = removeFromTill(thisStr, `')`);
+    ch_json += "}";
+
+    return ch_json;
+  }
+  function loadChildrenHandler(thisStr) {
+    let childJson = "";
+    if (thisStr.includes(`loadChildren`)) {
+      const ch_str = thisStr.split('}');
+      let fun_str = "";
+      childJson = childJsonCreator(ch_str[0]);
+      fun_str = removeFromTill(thisStr, '}');
+
+      let childJsonData = loadChildrenHandler(fun_str);
+      childJson += childJsonData;
+      return childJson;
+    } else {
+      return childJson;
+    }
+  }
+
+  function jsonCreator(str) {
+    let thisStr = str;
+    thisStr = removeFromTill(thisStr, "Routes = [");
+
+    //thisStr = rm_first_elem(str_1);
+    if (thisStr.includes("children")) {
+
+      const str_2 = thisStr.split('{');
+      jsonData += '{';                           //bb
+      thisStr = removeFromTill(thisStr, "{");
+
+      const str_3 = thisStr.split('children');
+      jsonData += str_3[0] + 'children';
+      thisStr = removeFromTill(thisStr, 'children');
+
+      const str_4 = thisStr.split('[');
+      jsonData += str_4[0] + '[';
+      thisStr = removeFromTill(thisStr, "[");     //aa
+
+      // clild json start
+      const childJsonData = loadChildrenHandler(thisStr);
+      jsonData += childJsonData;
+
+      //thisStr = removeFromTill(thisStr, "[");
+
+
+      jsonData += ']';                            //aa
+      jsonData += '}';                            //bb
+
+    } else {
+      const chJson = thisStr.split(']');
+      jsonData += chJson;
+
+    }
+
+    return jsonData
+  };
+
+  console.log(jsonCreator(str));
+</script>
+
+</html>
