@@ -2,6 +2,29 @@ https://github.com/lyraddigital/chat-app-react
 https://code-projects.org/online-examination-system-in-php-with-source-code/
 https://github.com/savsofts/savsoftquiz_v5/blob/master/readme.md
 
+$(document).ready(function(){
+  const obj = [
+    {"cl_id":"102","child":[{"is_a":false, "id":"1"},{"is_a":true, "id":"2"},{"is_a":false, "id":"3"}]},
+    {"cl_id":"103","child":[{"is_a":true, "id":"4"},{"is_a":false, "id":"5"},{"is_a":false, "id":"6"}]},
+    {"cl_id":"104","child":[{"is_a":false, "id":"7"},{"is_a":true, "id":"8"},{"is_a":true, "id":"9"},{"is_a":false, "id":"10"}]},
+    {"cl_id":"105","child":[{"is_a":false, "id":"11"},{"is_a":false, "id":"12"},{"is_a":false, "id":"13"}]},
+  ];
+
+  const _new = obj.map((item)=>{
+    let chi_id = [];
+    item.child.map((chi)=>{
+      if(chi.is_a){
+        chi_id.push(chi.id)
+      }
+    });
+    console.log(chi_id);
+    item = {cl_id : item.cl_id, chi_ob : chi_id};
+    return item;
+  })
+
+  console.log(JSON.stringify(_new));
+
+});
 
 
 SELECT * FROM test.new_table;
