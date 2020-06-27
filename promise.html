@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+		<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+		<script
+			src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	</head>
+
+	<body>
+		<div id="root"></div>
+<script>
+"use strict"
+$(document).ready(function(){
+
+
+function caserUpper(val) {
+  return new Promise((resolve, reject) => {
+    resolve(val.toUpperCase());
+  });
+}
+
+async function msg(x) {
+  try {
+    const msg = await caserUpper(x);
+    console.log(msg);
+  } catch(err) {
+    console.log('Ohh no:', err.message);
+  }
+}
+
+msg('Hello'); // HELLO
+msg(34); // Ohh no: val.toUpperCase is not a function
+
+// -------------------------------------------///////////////---------------------------------------
+
+// function funOne (){
+// 	return new Promise(resolve => { 
+// 		setTimeout(()=>{
+// 			// console.log("First Function");
+// 			resolve("First Function");
+// 		},2000)
+// 	})
+
+// }
+
+// function funTwo(){
+// 	return new Promise(resolve => { 
+// 		setTimeout(()=>{
+// 			// console.log("Second Function");
+// 			resolve("Second Function");
+// 		},1000)
+// 	})
+// }
+
+// -------------------------------------------///////////////---------------------------------------
+async function firstAsync() {
+	const _fun_1 = await funOne();
+	const _fun_2 = await funTwo();
+	console.log(_fun_1);
+    console.log(_fun_2);
+};
+
+// firstAsync();
+// -------------------------------------------///////////////---------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// async function firstAsync() {
+//     let promise = new Promise((res, rej) => {
+//         setTimeout(() => res("Now it's done!"), 1000)
+//     });
+
+//     // wait until the promise returns us a value
+//     let result = await promise; 
+  
+//     // "Now it's done!"
+//     alert(result); 
+// };
+
+// firstAsync();
+
+// async function firstAsync() {
+//   return 27;
+// }
+
+// firstAsync().then(alert); // 27
+
+// -------------------------------------------///////////////---------------------------------------
+
+function xyz(res){
+	console.log(res)
+}
+
+const _newpromise = new Promise(function(resolve, reject) {
+
+	setTimeout(
+			() => resolve(1), 1000
+		); 
+
+	})
+
+
+
+
+	async function newFun(){
+
+		let b = await _newpromise.then(function(result) { 
+
+			alert(result); 
+			return result * 2;
+
+			}).then(function(result) { 
+
+			alert(result); 
+			return result * 8;
+
+			}).then(function(result) {
+
+			alert(result); 
+			return result * 7;
+
+			}).then(function(result) {
+
+			alert(result); 
+			return result * 10;
+
+			});
+		// let b = await _newpromise;
+		console.log(b);
+		xyz(b);
+		return b;
+	}
+
+	var ans = newFun();
+
+	console.log(ans);
+	
+// -------------------------------------------///////////////---------------------------------------
+
+
+});
+</script>
+	</body>
+</html>
