@@ -103,3 +103,33 @@ FROM driver d JOIN
      ON i.driver_id = d.id
 GROUP BY d.id, i.balance
 ORDER BY d.id DESC;
+
+
+/**/*/**/*/*/*/*/
+Don't work hard, use it.
+Do not work hard, get your work done easily before others.
+
+We believe in the power of technology to make school owners efficient, empowered and happier, so they can focus on what matters most for their school.
+
+Keeping your complex and important work in mind, we have made it easy to do your work. we have put school owners at the centre of our Application Development. We have dedicated last 3+ years to make Technology more useful and beneficial for small and medium Schools. We have dared to pursue crazy ideas, un-thinkable scenarios and everyday schools problems to bring you the solutions that make your life easier while helping you grow your business.
+
+
+
+Take a demo
+
+
+Fast, Secure and Absolutely Awesome
+
+easy to use
+	You can completely rely on our Application. We have taken utmost care to provide you with extremely reliable technology. From your data to your reports, everything will be accurate. 
+You will always be rest assured about your school result, Student Progress and Accounts. 
+We have taken all the measures, so you continue to focus your energy on your School Eduction. 
+
+work on click.
+	Our Application moves as fast as you. With It’s ‘flow-based data entry’ system, you will be able to enter any data in seconds. With instant single-key reporting, all your business reports will be generated within some seconds. It's speed and responsiveness will make typing on keyboard seem slow, making our Application the only software that you would love to use.  
+
+needs of every school  
+	Your school and its needs are unique, so our Application is designed to be free of any rigid processes. You can operate it's the way you want; from things as simple as grouping stocks your way, to using multiple stock units. Your use of Tally will only be limited by your imagination. 
+
+developed for you.
+	You can completely rely on Tally. We have taken utmost care to provide you with extremely reliable technology. From your data to your reports, everything will be accurate. You will always be rest assured about authenticity of your tax compliance. We have taken all the measures, so you continue to focus your energy on your Business. 
