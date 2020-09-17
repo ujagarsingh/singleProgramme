@@ -4,6 +4,9 @@ var timeDiff = Math.abs(date2.getTime() - date1.getTime());
 var diffDays = Math.ceil(timeDiff / (1000 * 3600 * 24)); 
 alert(diffDays);
 
+/* Grid Table */
+https://react-table.tanstack.com/docs/examples/kitchen-sink
+
 /*http://kthornbloom.com/monthly/*/
 //index
 http://codeytech.com/site-templates/applify/demo-web-app.html
