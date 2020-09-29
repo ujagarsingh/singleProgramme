@@ -7368,7 +7368,29 @@
 			item =
 		})
 		*/
+const _obj = c_student.map((item)=>{
+      const _new_item = item.fee_class.map((f_item)=>{
+        const _item = {
+          admission_number: item.admission_number,
+          class_id: item.class_id,
+          father_name: item.father_name,
+          free_seat: item.free_seat,
+          group_id: item.group_id,
+          school_id: item.school_id,
+          se_id: item.se_id,
+          session_year_id: item.session_year_id,
+          student_name: item.student_name,
 
+          cat_name: f_item.cat_name,
+          effected_led : f_item.effected_led,
+          fee_amount: f_item.fee_amount,
+          fee_cat_id : f_item.id
+        }
+        return _item;
+      })
+
+			return _new_item[0];
+    })
 	</script>
 </body>
 
