@@ -7319,13 +7319,13 @@
 ];
 
 		const _month = "March";
-		 // console.log(_student);
-		 // console.log(_fee_stru);
+		 // console.log(JSON.stringify(_fee_stru));
+		 console.log(_student);
 		let _header = [];
  
  		const c_student = _student.map((s_item) => {
-			const _c_fee = _fee_stru.filter((f_item) => {
-				if ((s_item.class_id === f_item.class_id) && (f_item.collect_time.includes(_month))) {
+      const _c_fee = _fee_stru.filter((f_item) => {
+        if ((f_item.collect_time) && (s_item.class_id === f_item.class_id) && (f_item.collect_time.includes(_month))) {
 					if(!_header.includes(f_item.cat_name)){
 						_header = [..._header, f_item.cat_name];
 					}
@@ -7343,32 +7343,13 @@
 			})
 
 			s_item = { 
-						// "s_id": s_item.s_id,
-						"se_id": s_item.se_id,
-						"group_id": s_item.group_id,
-						"school_id": s_item.school_id,
-						"session_year_id": s_item.session_year_id,
-						"admission_number": s_item.admission_number,
-						"student_name": s_item.student_name,
-						"class_id": s_item.class_id,
-						"free_seat": s_item.free_seat,
-						"rte_stationary": s_item.rte_stationary,
+						...s_item,
 						"fee_class": fee_strc
 					};
 
 			return s_item;
-		})
-
-		console.log(c_student);
-		// console.log(JSON.stringify(c_student));
-		console.log(_header);
-
-		/*
-		const _update_student = _student.map((item)=>{
-			item =
-		})
-		*/
-const _obj = c_student.map((item)=>{
+    })
+    const _obj = c_student.map((item)=>{
       const _new_item = item.fee_class.map((f_item)=>{
         const _item = {
           admission_number: item.admission_number,
@@ -7380,7 +7361,7 @@ const _obj = c_student.map((item)=>{
           se_id: item.se_id,
           session_year_id: item.session_year_id,
           student_name: item.student_name,
-
+          
           cat_name: f_item.cat_name,
           effected_led : f_item.effected_led,
           fee_amount: f_item.fee_amount,
@@ -7388,9 +7369,26 @@ const _obj = c_student.map((item)=>{
         }
         return _item;
       })
-
+      
 			return _new_item[0];
     })
+    
+    console.log(JSON.stringify(_obj));
+    
+    let fee_obj = [];
+
+    _header.map((item)=>{
+      let fee_amount = 0;
+      _obj.map((o_item, indx)=>{
+        if(item === o_item.cat_name){
+          fee_amount += parseInt(o_item.fee_amount);
+        }
+      })
+      fee_obj = [...fee_obj, {"item" :item, "fee_amount" : fee_amount}];
+    })
+    
+    console.log(fee_obj);
+		
 	</script>
 </body>
 
