@@ -6,7 +6,7 @@ alert(diffDays);
 
 /* Grid Table */
 https://react-table.tanstack.com/docs/examples/kitchen-sink
-
+https://www.schemecolor.com/classic-pastels.php
 /*http://kthornbloom.com/monthly/*/
 //index
 http://codeytech.com/site-templates/applify/demo-web-app.html
