@@ -1,3 +1,8 @@
+
+SELECT * FROM acc_ledger_entry WHERE id IN (SELECT MAX(id) 
+FROM acc_ledger_entry WHERE ledger_folio IN ('106_S_4', '20_O_4') 
+GROUP BY ledger_folio);
+
 -- phpMyAdmin SQL Dump
 -- version 5.0.2
 -- https://www.phpmyadmin.net/
