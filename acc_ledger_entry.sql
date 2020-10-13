@@ -191,9 +191,6 @@ function createDueVoucherEntry(){
  
 }
 
-
-
-
 // update Ledger's With current balance in one query
 function updateLedgerWithBalance($entry_obj){
 	// $this->ledger_details;
@@ -206,16 +203,12 @@ function updateLedgerWithBalance($entry_obj){
             array_push($whereIn4_L, $obj['ledger_folio']);
         }
     }
-
     // echo"<pre>";print_r($whereIn4_L);echo"</pre>";// die();
     // echo"<pre>";print_r($whereIn4_G);echo"</pre>"; //die();
     // echo"<pre>";print_r($whereIn4_R);echo"</pre>"; die();
-
     // get all last entries of every ledger which is effected in this voucher entry 
     // from acc_ledger_entry table using $whereIn4_L
-
     $this->readCurrentLedgers($whereIn4_L);
-
     // echo"<pre>";print_r($this->lgr_f_ids);echo"</pre>"; die();
     foreach($entry_obj as $e_obj) { 
         // bind the values one by one for fee category
@@ -230,7 +223,6 @@ function updateLedgerWithBalance($entry_obj){
         $lgr_obj['group_code'] = $e_obj['group_code'];
         $lgr_obj['group_folio'] = $e_obj['group_folio'];
         $crnt_folio = $e_obj['ledger_folio'];
-
         if(!in_array($crnt_folio, $this->lgr_f_ids)){
             array_push($this->lgr_f_ids, $crnt_folio);
             
@@ -241,9 +233,7 @@ function updateLedgerWithBalance($entry_obj){
             $lgr_obj['cl_balance'] = $e_obj['tr_amount'];
             $lgr_obj['cl_type'] = $e_obj['tr_type'];
             $lgr_obj['session_year_id'] = $this->session_year_id;
-
             $this->ledger_obj[] = $lgr_obj;
-
             // echo"<pre>";print_r(in_array($crnt_folio, $lgr_f_ids));echo"</pre>"; die();
         } else {
             // echo"<pre>";print_r($ledger_obj);echo"</pre>";die();
@@ -267,14 +257,12 @@ function updateLedgerWithBalance($entry_obj){
                 $clng_bal = abs($chck_bal);
             } 
             // calculate closing balance end
-
             $lgr_obj['op_balance'] = $existing_obj['cl_balance']; 
             $lgr_obj['op_type'] = $existing_obj['cl_type']; 
             $lgr_obj['tr_amount'] = $e_obj['tr_amount'];
             $lgr_obj['tr_type'] = $e_obj['tr_type'];
             $lgr_obj['cl_balance'] = $clng_bal;
             $lgr_obj['cl_type'] = $clng_typ;
-
             $lgr_obj['session_year_id'] = $this->session_year_id;
             $this->ledger_obj[] = $lgr_obj;
             
@@ -304,9 +292,7 @@ function updateLedgerWithBalance($entry_obj){
     /*$query .= "ON DUPLICATE KEY UPDATE
                 sub_name = VALUES(sub_name),
                 sub_lavel = VALUES(sub_lavel)";*/
-
     $stmt = $this->conn->prepare($query);
-
     $i = 1;
     foreach($updated_L_obj as $e_obj) { 
         // bind the values one by one for fee category
@@ -334,9 +320,7 @@ function updateLedgerWithBalance($entry_obj){
         return false;
     }
     // Update Group Current Balance 
-
 }
-
 
 function getFilteredLedgerArray($crnt_folio, $ledger_obj) {
     $filtredArray = [];
@@ -393,51 +377,56 @@ function updateGroupWithBalance($ledger_obj){
             $sngl_g_obj = Array();
             
             foreach($ledger_obj as $g_obj) { 
-                
-                    if($gId === $g_obj['group_folio'] && $_index === 0){
-
-                        // echo"<pre>";print_r($g_obj);echo"</pre>"; die();
+                if($gId === $g_obj['group_folio'] && $_index === 0){
+                    $_tr_amo = getLastTransValuesofGroup($gId, $rId, $ledger_obj);
                     
-                        $_tr_amo = getLastTransValuesofGroup($gId, $rId, $ledger_obj);
-                        
-                        if(!in_array($gId, $this->grp_f_ids)){
-                            // new group or first time
-                            array_push($this->grp_f_ids, $gId);
-                            echo"<pre>";print_r('New Object');echo"</pre>"; die();
-                            $sngl_g_obj['op_balance'] = 0;
-                            $sngl_g_obj['op_type'] = $g_obj['op_type'];
-                            $sngl_g_obj['tr_amount'] = $_tr_amo;
-                            $sngl_g_obj['tr_type'] = $g_obj['tr_type'];
-                            $sngl_g_obj['cl_balance'] = $_tr_amo;
-                            $sngl_g_obj['cl_type'] = $g_obj['tr_type'];
+                    $sngl_g_obj['op_balance'] = 0;
+                    $sngl_g_obj['op_type'] = $g_obj['op_type'];
+                    $sngl_g_obj['tr_amount'] = $_tr_amo;
+                    $sngl_g_obj['tr_type'] = $g_obj['tr_type'];
+                    $sngl_g_obj['cl_balance'] = $_tr_amo;
+                    $sngl_g_obj['cl_type'] = $g_obj['tr_type'];
 
-                        } else {
-                            // if group existing already
-                            echo"<pre>";print_r('Existing Object');echo"</pre>"; die();
-
-                            $old_grp_obj = $this->getFilteredGroupArray($gId, $this->group_obj);
-                            // echo"<pre>";print_r($old_grp_obj);echo"</pre>"; die();
-                            
-                            $sngl_g_obj['op_balance'] = $old_grp_obj['op_balance'];
-                            $sngl_g_obj['op_type'] = $old_grp_obj['op_type'];
-                            $sngl_g_obj['tr_amount'] = $_tr_amo;
-                            $sngl_g_obj['tr_type'] = $g_obj['tr_type'];
-                            $sngl_g_obj['cl_balance'] = $_tr_amo;
-                            $sngl_g_obj['cl_type'] = $g_obj['tr_type'];
-                        }
-                        $sngl_g_obj['group_code'] = $g_obj['group_code'];
-                        $sngl_g_obj['school_id'] = $g_obj['school_id'];
-                        $sngl_g_obj['session_year_id'] = $g_obj['session_year_id'];
-                        $sngl_g_obj['vchr_ref_id'] = $g_obj['vchr_ref_id'];
-                        $sngl_g_obj['group_folio'] = $g_obj['group_folio'];
-                        $_index++;
-                        
-                    }
-                // if(!in_array($crnt_group, $group_codes)){
-                // } else {
-                // }
+                    $sngl_g_obj['group_code'] = $g_obj['group_code'];
+                    $sngl_g_obj['school_id'] = $g_obj['school_id'];
+                    $sngl_g_obj['session_year_id'] = $g_obj['session_year_id'];
+                    $sngl_g_obj['vchr_ref_id'] = $g_obj['vchr_ref_id'];
+                    $sngl_g_obj['group_folio'] = $g_obj['group_folio'];
+                    $_index++;
+                    
+                }
             };
-            array_push($this->group_obj, $sngl_g_obj);
+            $update_obj = Array();
+            if(in_array($gId, $this->grp_f_ids)){
+                // if this single object's group_folio is already exist.
+                $old_grp_obj = $this->getFilteredGroupArray($gId, $this->group_obj);
+                
+                $clng_bal = 0;
+                $clng_typ = $old_grp_obj['cl_type'];
+
+                if($sngl_g_obj['tr_type'] === $old_grp_obj['cl_type']){
+                    $clng_bal = $old_grp_obj['cl_balance'] + $sngl_g_obj['tr_amount'];
+                } else {
+                    $chck_bal = $old_grp_obj['cl_balance'] - $sngl_g_obj['tr_amount'];
+                    if($chck_bal < 0){
+                        $clng_typ = $sngl_g_obj['tr_type'];
+                    } 
+                    $clng_bal = abs($chck_bal);
+                } 
+
+                $update_obj['op_balance'] = $old_grp_obj['cl_balance'];
+                $update_obj['op_type'] = $old_grp_obj['cl_type'];
+                $update_obj['tr_amount'] = $sngl_g_obj['tr_amount'];
+                $update_obj['tr_type'] = $sngl_g_obj['tr_type'];
+                $update_obj['cl_balance'] = $clng_bal;
+                $update_obj['cl_type'] = $clng_typ;
+
+            }else {
+                // if this single object's group_folio is new.
+                $update_obj = $sngl_g_obj;
+            }
+
+            array_push($this->group_obj, $update_obj);
         }
     }
    
@@ -489,8 +478,105 @@ function updateGroupWithBalance($ledger_obj){
 
 }
 
-
 function getFilteredGroupArray($grp_code, $group_obj) {
+    $filtredArray = [];
+    foreach($group_obj as $key => $value) {
+        if($grp_code == strval($grp_code)){
+            $filtredArray = $value;
+        } else {
+            continue;
+        }
+    }
+    //echo"<pre>";print_r( json_encode($filtredArray) );echo"</pre>"; die();
+    return $filtredArray;
+}
+
+updateCostCenterWithBalance($this->ledger_obj, $this->group_obj, $whereIn4_CC, $whereIn4_R)
+
+// update CostCenter's current balance in one query
+function updateCostCenterWithBalance($ledger_obj, $group_obj, $whereIn4_CC, $whereIn4_R){
+    
+    function getLastTransValuesofGroup($grp_folio, $ref, $data){
+        $amo = 0;
+        foreach($data as $w_obj) {     
+            // echo"<pre>";print_r($w_obj);echo"</pre>"; die(); 
+            if($grp_folio === $w_obj['group_folio'] && $ref === $w_obj['vchr_ref_id'] ){
+                $amo += $w_obj['tr_amount'];
+            }
+        };
+        // echo"<pre>";print_r($amo);echo"</pre>"; die(); 
+        return $amo;
+    }  
+       
+    // echo"<pre>";print_r($whereIn4_CC);echo"</pre>"; die();
+    $this->readCurrentGroup($whereIn4_CC);
+
+    foreach($whereIn4_R as $rId) { 
+        foreach($whereIn4_CC as $gId) { 
+            $_index = 0;
+            $sngl_g_obj = Array();
+            
+            foreach($ledger_obj as $g_obj) { 
+                if($gId === $g_obj['group_folio'] && $_index === 0){
+                    $_tr_amo = getLastTransValuesofGroup($gId, $rId, $ledger_obj);
+                    
+                    $sngl_g_obj['op_balance'] = 0;
+                    $sngl_g_obj['op_type'] = $g_obj['op_type'];
+                    $sngl_g_obj['tr_amount'] = $_tr_amo;
+                    $sngl_g_obj['tr_type'] = $g_obj['tr_type'];
+                    $sngl_g_obj['cl_balance'] = $_tr_amo;
+                    $sngl_g_obj['cl_type'] = $g_obj['tr_type'];
+
+                    $sngl_g_obj['group_code'] = $g_obj['group_code'];
+                    $sngl_g_obj['school_id'] = $g_obj['school_id'];
+                    $sngl_g_obj['session_year_id'] = $g_obj['session_year_id'];
+                    $sngl_g_obj['vchr_ref_id'] = $g_obj['vchr_ref_id'];
+                    $sngl_g_obj['group_folio'] = $g_obj['group_folio'];
+                    $_index++;
+                    
+                }
+            };
+            $update_obj = Array();
+            if(in_array($gId, $this->grp_f_ids)){
+                // if this single object's group_folio is already exist.
+                $old_grp_obj = $this->getFilteredGroupArray($gId, $group_obj);
+                
+                $clng_bal = 0;
+                $clng_typ = $old_grp_obj['cl_type'];
+
+                if($sngl_g_obj['tr_type'] === $old_grp_obj['cl_type']){
+                    $clng_bal = $old_grp_obj['cl_balance'] + $sngl_g_obj['tr_amount'];
+                } else {
+                    $chck_bal = $old_grp_obj['cl_balance'] - $sngl_g_obj['tr_amount'];
+                    if($chck_bal < 0){
+                        $clng_typ = $sngl_g_obj['tr_type'];
+                    } 
+                    $clng_bal = abs($chck_bal);
+                } 
+
+                $update_obj['op_balance'] = $old_grp_obj['cl_balance'];
+                $update_obj['op_type'] = $old_grp_obj['cl_type'];
+                $update_obj['tr_amount'] = $sngl_g_obj['tr_amount'];
+                $update_obj['tr_type'] = $sngl_g_obj['tr_type'];
+                $update_obj['cl_balance'] = $clng_bal;
+                $update_obj['cl_type'] = $clng_typ;
+
+            }else {
+                // if this single object's group_folio is new.
+                $update_obj = $sngl_g_obj;
+            }
+
+            array_push($group_obj, $update_obj);
+        }
+    }
+   
+   echo"<pre>";print_r(json_encode($this->group_obj));echo"</pre>"; die();
+   
+   return $group_obj;
+
+}
+
+function getFilteredCostCenterArray($grp_code, $group_obj) {
     $filtredArray = [];
     foreach($group_obj as $key => $value) {
         if($grp_code == strval($grp_code)){
@@ -607,7 +693,62 @@ function readCurrentGroup($where_in){
 
  
 }
+
+// used when filling up the update product form
+function readCurrentCostCenter($where_in){
  
+    // query to read single record
+    $where_str = implode("', '",$where_in);
+    
+    $query = "SELECT * FROM " . $this->table_grp_entry . " WHERE id IN (SELECT MAX(id) 
+        FROM " . $this->table_grp_entry . " WHERE group_folio IN ( '$where_str' ) 
+        GROUP BY group_folio);";
+
+    // prepare query statement
+    $stmt = $this->conn->prepare( $query );
+    
+    // bind id of product to be updated
+    $stmt->bindParam(":where_str", $where_str);
+
+    // execute query
+    // echo"<pre>";print_r($stmt);echo"</pre>"; die();
+    $stmt->execute();
+    $num = $stmt->rowCount();
+    // echo"<pre>";print_r($stmt);echo"</pre>"; die();
+
+    if ($num > 0)
+    {
+        $entry_item = array();
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC))
+        {
+            extract($row);
+            // echo"<pre>";print_r($row);echo"</pre>"; die();
+            $entry_item['item_type'] = 'old';
+
+            $entry_item['id'] = $row['id'];
+            $entry_item['school_id'] = $row['school_id'];
+            $entry_item['vchr_ref_id'] = $row['vchr_ref_id'];
+            $entry_item['group_folio'] = $row['group_folio'];
+            $entry_item['group_code'] = $row['group_code'];
+            $entry_item['op_balance'] = $row['op_balance'];
+            $entry_item['op_type'] = $row['op_type'];
+            $entry_item['tr_amount'] = $row['tr_amount'];
+            $entry_item['tr_type'] = $row['tr_type'];
+            $entry_item['cl_balance'] = $row['cl_balance'];
+            $entry_item['cl_type'] = $row['cl_type'];
+            $entry_item['session_year_id'] = $row['session_year_id'];
+
+            $this->group_obj[] = $entry_item;
+            $this->grp_f_ids[] = $row['group_folio'];
+        }
+        return true;
+    } else {
+        return false;
+    }
+
+ 
+}
+
 // used when filling up the update product form
 function readOne(){
  
@@ -633,7 +774,6 @@ function readOne(){
  
 }
 
-  
 // update the product
 function update(){
 	
@@ -709,8 +849,6 @@ function getMonthFromDate($tr_date){
     return $month;
 }
 
+
+
 }
-
-
-
- 
