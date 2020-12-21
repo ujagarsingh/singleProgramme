@@ -1,0 +1,3 @@
+DateWise >> ledger_vouchers.jsp
+profit & loss A/c
+create Salary >> Accounting > Create Salary
