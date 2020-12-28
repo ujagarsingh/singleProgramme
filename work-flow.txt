@@ -1,3 +1,8 @@
-DateWise >> ledger_vouchers.jsp
-profit & loss A/c
-create Salary >> Accounting > Create Salary
+Accounting Voucher EDIT/DELETE >>
+	Journal, Payment, Receipt, Contra, etc...
+
+	
+Delete >> 
+	one vchr entry/ 
+	all due of [one month], salary entry of [one time]
+	(if by chance enter a wrong entry.)
