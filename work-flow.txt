@@ -1,3 +1,6 @@
+Balance Sheet >> 
+	Ground Total
+	
 Accounting Voucher EDIT/DELETE >>
 	Journal, Payment, Receipt, Contra, etc...
 
