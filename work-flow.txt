@@ -1,11 +1,11 @@
-Balance Sheet >> 
-	Ground Total
-	
+
 Accounting Voucher EDIT/DELETE >>
 	Journal, Payment, Receipt, Contra, etc...
 
-	
 Delete >> 
 	one vchr entry/ 
 	all due of [one month], salary entry of [one time]
 	(if by chance enter a wrong entry.)
+
+Balance Sheet >> 
+	Ground Total
