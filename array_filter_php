@@ -20,13 +20,6 @@ class AccountManager{
     }
     
     // COMMON ARRAY_FILTER FUNCTION
-    function filterByValue($items_obj, $filter_key, $compare_key){
-        return array_filter($items, function($item) use ($filter_key){
-            if($item[$compare_key] === $filter_key){
-                return true;
-            }
-        })
-    }
 
 function getAccountManager($obj) {
         $ldr_data = getGroupWiseDetailBalanceSheet($obj);
@@ -45,119 +38,184 @@ function getAccountManager($obj) {
         //         return mg_item;
         //     };
         // });
-        $filter_key = null;
-        $compare_key = "under_gp_id";
-        $main_group = filterByValue($acc_group, $filter_key, $compare_key);
 
-        function getSubLedgersHander(all_ledger, s_item) {
-            $sub_ledgers = all_ledger.filter((item) => {
-                if (item.under_group == s_item.id) {
-                    return item;
+        $main_group = return array_filter($acc_group, function($item){
+                if($item['under_gp_id'] === null){
+                    return true;
                 }
             });
 
-            let cr_amo = 0;
-            let dr_amo = 0;
-            $updated_ledgers = sub_ledgers.map((l_item) => {
-                if (l_item.blnc_type === "CR") {
-                    cr_amo += Number(l_item.cl_blnc)
+        function getSubLedgersHander($all_ledger, $s_item) {
+
+            // $sub_ledgers = all_ledger.filter((item) => {
+            //     if (item.under_group == s_item.id) {
+            //         return item;
+            //     }
+            // });
+
+            $sub_ledgers = return array_filter($all_ledger, function($item){
+                    if($item['under_group'] ===  $s_item['id']){
+                        return true;
+                    };
+                });
+            
+            $cr_amo = 0;
+            $dr_amo = 0;
+            // $updated_ledgers = sub_ledgers.map((l_item) => {
+            //     if (l_item.blnc_type === "CR") {
+            //         cr_amo += Number(l_item.cl_blnc);
+            //     } else {
+            //         dr_amo += Number(l_item.cl_blnc);
+            //     };
+            //     return l_item;
+            // });
+
+            $updated_ledgers = array()
+            foreach($sub_ledgers as $key => $value) {
+                if ($key['blnc_type'] === "CR") {
+                    $cr_amo += Number($l_item['cl_blnc']);
                 } else {
-                    dr_amo += Number(l_item.cl_blnc)
-                }
-                return l_item;
-            });
+                    $dr_amo += Number($l_item['cl_blnc']);
+                };
+                $updated_ledgers[$key] = $value;
+            };
 
             $update_s_item = {
-                "sub_ledgers": updated_ledgers,
+                "sub_ledgers": $updated_ledgers,
                 "type": "S_GRP",
-                "cl_blnc": Math.abs(cr_amo - dr_amo),
-                "blnc_type": (cr_amo <= dr_amo) ? "DR" : "CR"
+                "cl_blnc": Math.abs($cr_amo - $dr_amo),
+                "blnc_type": ($cr_amo <= $dr_amo) ? "DR" : "CR"
             };
-            return update_s_item;
+            return $update_s_item;
         };
 
-        function getSubGroupsHandler(_group, m_item) {
-            let sub_group_with_ledgers = [];
-            $sub_groups = _group.filter((item) => {
-                if (item.under_gp_id == m_item.id) {
-                    return item;
-                }
-            })
-            let cr_amo = 0;
-            let dr_amo = 0;
+        function getSubGroupsHandler($_group, $m_item) {
+            $sub_group_with_ledgers = [];
+            // $sub_groups = _group.filter((item) => {
+            //     if (item.under_gp_id == m_item.id) {
+            //         return item;
+            //     }
+            // })
 
-            if (sub_groups.length > 0) {
-                sub_group_with_ledgers = sub_groups.map((s_item) => {
-                    $sub_ledgers = getSubLedgersHander(all_LWB, s_item);
-
-                    if (sub_ledgers.blnc_type === "CR") {
-                        cr_amo += Number(sub_ledgers.cl_blnc)
-                    } else {
-                        dr_amo += Number(sub_ledgers.cl_blnc)
+            $sub_groups = return array_filter($all_ledger, function($item){
+                    if($item['under_gp_id'] ===  $s_item['id']){
+                        return true;
                     }
-                    s_item = { ...s_item, ...sub_ledgers }
-                    return s_item;
-                })
-            } else {
-                $sub_ledgers = getSubLedgersHander(all_LWB, m_item);
+                });
 
-                if (sub_ledgers.blnc_type === "CR") {
-                    cr_amo += Number(sub_ledgers.cl_blnc)
+            $cr_amo = 0;
+            $dr_amo = 0;
+
+            if ($sub_groups.length > 0) {
+                // $sub_group_with_ledgers = $sub_groups.map(($s_item) => {
+                //     $sub_ledgers = getSubLedgersHander($all_LWB, $s_item);
+
+                //     if ($sub_ledgers['blnc_type'] === "CR") {
+                //         $cr_amo += Number($sub_ledgers['cl_blnc']);
+                //     } else {
+                //         $dr_amo += Number($sub_ledgers['cl_blnc']);
+                //     }
+                //     $s_item = { ...$s_item, ...$sub_ledgers };
+                //     return $s_item;
+                // });
+
+                $sub_group_with_ledgers = array()
+                foreach($sub_groups as $s_item) {
+                    $sub_ledgers = getSubLedgersHander($all_LWB, $s_item);
+                    if ($sub_ledgers['blnc_type'] === "CR") {
+                        $cr_amo += Number($sub_ledgers['cl_blnc']);
+                    } else {
+                        $dr_amo += Number($sub_ledgers['cl_blnc']);
+                    }
+                    $s_item = { ...$s_item, ...$sub_ledgers };
+                    return $s_item;
+                }
+                
+
+            } else {
+                $sub_ledgers = getSubLedgersHander($all_LWB, $m_item);
+
+                if ($sub_ledgers['blnc_type'] === "CR") {
+                    $cr_amo += Number($sub_ledgers['cl_blnc'])
                 } else {
-                    dr_amo += Number(sub_ledgers.cl_blnc)
+                    $dr_amo += Number($sub_ledgers['cl_blnc'])
                 }
 
-                sub_group_with_ledgers = sub_ledgers.sub_ledgers;
-            }
+                $sub_group_with_ledgers = $sub_ledgers['sub_ledgers'];
+            };
 
             $update_g_item = {
-                "sub_group": sub_group_with_ledgers,
+                "sub_group": $sub_group_with_ledgers,
                 "type": "P_GRP",
-                "cl_blnc": Math.abs(cr_amo - dr_amo),
-                "blnc_type": (cr_amo <= dr_amo) ? "DR" : "CR"
+                "cl_blnc": Math.abs($cr_amo - $dr_amo),
+                "blnc_type": ($cr_amo <= $dr_amo) ? "DR" : "CR"
             };
 
-            return update_g_item;
+            return $update_g_item;
         };
 
-        function p_and_l_accountHandler(all_groups) {
-            let l_cr_amo = 0;
-            let l_dr_amo = 0;
-            $left_side = all_groups.filter((l_item) => {
-                if (l_item.id == "1") {
-                    if (l_item.blnc_type === "CR") {
-                        l_cr_amo += Number(l_item.cl_blnc)
-                    } else {
-                        l_dr_amo += Number(l_item.cl_blnc)
+        function p_and_l_accountHandler($all_groups) {
+            $$l_cr_amo = 0;
+            $$l_dr_amo = 0;
+            // $left_side = all_groups.filter((l_item) => {
+            //     if (l_item.id == "1") {
+            //         if (l_item.blnc_type === "CR") {
+            //             l_cr_amo += Number(l_item.cl_blnc)
+            //         } else {
+            //             l_dr_amo += Number(l_item.cl_blnc)
+            //         }
+            //         return l_item
+            //     }
+            // });
+            $left_side = return array_filter($all_groups, function($item){
+                    if ($item['id'] == "1") {
+                        if ($item['blnc_type'] === "CR") {
+                            $l_cr_amo += Number($item['cl_blnc'])
+                        } else {
+                            $l_dr_amo += Number($item['cl_blnc'])
+                        }
+                        return true
                     }
-                    return l_item
-                }
-            });
+                });
+
             $left_obj = {
                 "cl_blnc": Math.abs(l_cr_amo - l_dr_amo),
                 "blnc_type": (l_cr_amo <= l_dr_amo) ? "DR" : "CR",
             }
 
-            let r_cr_amo = 0;
-            let r_dr_amo = 0;
-            $right_side = all_groups.filter((l_item) => {
-                if (l_item.id == "2") {
-                    if (l_item.blnc_type === "CR") {
-                        r_cr_amo += Number(l_item.cl_blnc)
-                    } else {
-                        r_dr_amo += Number(l_item.cl_blnc)
+            $$r_cr_amo = 0;
+            $$r_dr_amo = 0;
+
+            // $right_side = all_groups.filter((l_item) => {
+            //     if (l_item.id == "2") {
+            //         if (l_item.blnc_type === "CR") {
+            //             r_cr_amo += Number(l_item.cl_blnc)
+            //         } else {
+            //             r_dr_amo += Number(l_item.cl_blnc)
+            //         }
+            //         return l_item
+            //     }
+            // });
+
+            $right_side = return array_filter($all_groups, function($item){
+                    if ($item['id'] == "2") {
+                        if ($item['blnc_type'] === "CR") {
+                            $r_cr_amo += Number($item['cl_blnc'])
+                        } else {
+                            $r_dr_amo += Number($item['cl_blnc'])
+                        }
+                        return true
                     }
-                    return l_item
-                }
-            });
+                });
+
             $right_obj = {
-                "cl_blnc": Math.abs(r_cr_amo - r_dr_amo),
-                "blnc_type": (r_cr_amo <= r_dr_amo) ? "DR" : "CR",
+                "cl_blnc": Math.abs($r_cr_amo - $r_dr_amo),
+                "blnc_type": ($r_cr_amo <= $r_dr_amo) ? "DR" : "CR",
             }
 
-            $total_blnc = Math.abs((left_obj.cl_blnc > right_obj.cl_blnc) ? left_obj.cl_blnc : right_obj.cl_blnc);
-            $cl_blnc = Math.abs(left_obj.cl_blnc - right_obj.cl_blnc);
-            $blnc_type = (left_obj.cl_blnc <= right_obj.cl_blnc) ? "DR" : "CR";
+            $total_blnc = Math.abs(($left_obj['cl_blnc'] > $right_obj['cl_blnc']) ? $left_obj['cl_blnc'] : $right_obj['cl_blnc']);
+            $cl_blnc = Math.abs($left_obj['cl_blnc'] - $right_obj['cl_blnc']);
+            $blnc_type = ($left_obj['cl_blnc'] <= $right_obj['cl_blnc']) ? "DR" : "CR";
 
             // sub_group impove when working on profit and loss account
             $p_and_l = {
@@ -169,26 +227,33 @@ function getAccountManager($obj) {
                 total_blnc: total_blnc,
                 cl_blnc: cl_blnc,
                 blnc_type: blnc_type,
-                sub_group: [...left_side, ...right_side],
+                sub_group: array_merge($left_side, $right_side),
             }
             return p_and_l;
         }
 
-        $groups_with_sub_groups = main_group.map((m_item) => {
-            $sub_groups = getSubGroupsHandler(_group, m_item);
-            m_item = { ...m_item, ...sub_groups }
-            return m_item;
-        });
+        // $groups_with_sub_groups = main_group.map((m_item) => {
+        //     $sub_groups = getSubGroupsHandler(_group, m_item);
+        //     $m_item = { ...m_item, ...sub_groups }
+        //     return m_item;
+        // });
+
+        $groups_with_sub_groups = array()
+        foreach($sub_groups as $m_item) {
+            $sub_groups = getSubGroupsHandler($_group, $m_item);
+            $m_item = { ...$m_item, ...$sub_groups }
+            return $m_item;
+        }
 
         $_p_and_l = p_and_l_accountHandler(groups_with_sub_groups);
-        groups_with_sub_groups.push(_p_and_l);
+        $groups_with_sub_groups.push(_p_and_l);
 
-        $result = { "data": { acc_manager: { "group_balance": groups_with_sub_groups, "ledger_data": ldr_data, "all_ledgers": compoundLedgers } } }
+        $result = { "data": { $acc_manager: { "group_balance": $groups_with_sub_groups, "ledger_data": $ldr_data, "all_ledgers": $compoundLedgers } } }
         return result;
     })
 }
 
-// let balance_res = accManager(final_balance, $obj);
+// $balance_res = accManager(final_balance, $obj);
 // // allGrp => All Groups, ldr_data => all ledger data
 // console.log({ "Gropu, Sub Group, ledger with Balance": balance_res });
 // // console.log(JSON.stringify(balance_res));
@@ -197,53 +262,73 @@ function getAccountManager($obj) {
 
 function getGroupWiseDetailBalanceSheet($obj) {
     // debugger;
-    let res_data = $obj.acc_entries;
-    let res_students = $obj.students;
-    let res_profs = $obj.professional;
-    let detaild_ldr = [];
-    res_data.map((ldrs) => {
-        $_newLdr = ldrs.ledgers.map((kItem) => {
-            $lr_ref = kItem.ldr_ref_id.split("_");
+    $res_data = $obj['acc_entries'];
+    $res_students = $obj['students'];
+    $res_profs = $obj['professional'];
+    $detaild_ldr = [];
+    
+    // $res_data.map(($ldrs) => {
+    foreach($res_data as $ldrs) {
+        // $_newLdr = $ldrs.ledgers.map((kItem) => {
+            $_newLdr = array();
+            foreach($ldrs['ledgers'] as $kItem) {
+            $lr_ref = $kItem['ldr_ref_id'].split("_");
 
-            switch (lr_ref[1]) {
+            switch ($lr_ref[1]) {
                 case 'STU':
                     // Students
-                    $ldr_info = res_students.filter((sItem) => {
-                        if (lr_ref[0] === sItem.se_id && lr_ref[2] === sItem.school_id) {
-                            return sItem;
-                        }
-                    })
-                    kItem = { ...kItem, "ldr_name": ldr_info[0].student_name + ' S/o ' + ldr_info[0].father_name + ' [' + ldr_info[0].admission_number + '/' + ldr_info[0].stu_class + ']' }
+                    // $ldr_info = res_students.filter((sItem) => {
+                    //     if (lr_ref[0] === sItem.se_id && lr_ref[2] === sItem.school_id) {
+                    //         return sItem;
+                    //     }
+                    // })
+                    $ldr_info = return array_filter($res_students, function($item){
+                        if($lr_ref[0] === $item['se_id'] && $lr_ref[2] === $item['school_id']){
+                            return true;
+                        };
+                    });
+                    $kItem = { ...$kItem, "ldr_name": $ldr_info[0]['student_name'] + ' S/o ' + $ldr_info[0]['father_name'] + ' [' + $ldr_info[0]['admission_number'] + '/' + $ldr_info[0]['stu_class'] + ']' }
                     break;
                 case 'STF':
                     // Staff
-                    $ldr_p_info = res_profs.filter((sItem) => {
-                        if (lr_ref[0] === sItem.s_id && lr_ref[2] === sItem.school_id) {
-                            return sItem;
-                        }
-                    })
+                    // $ldr_p_info = res_profs.filter((sItem) => {
+                    //     if (lr_ref[0] === sItem.s_id && lr_ref[2] === sItem.school_id) {
+                    //         return sItem;
+                    //     }
+                    // })
+                    $ldr_p_info = return array_filter($res_profs, function($item){
+                        if($lr_ref[0] === $item['s_id'] && $lr_ref[2] === $item['school_id']){
+                            return true;
+                        };
+                    });
 
-                    kItem = { ...kItem, "ldr_name": ldr_p_info[0].emp_name + ' S/o ' + ldr_p_info[0].emp_f_name }
+                    $kItem = { ...$kItem, "ldr_name": $ldr_p_info[0]['emp_name'] + ' S/o ' + $ldr_p_info[0]['emp_f_name'] }
 
                     break;
                 default:
                     // Other Ledgers
-                    $ldr_info1 = res_students.filter((sItem) => {
-                        if (lr_ref[0] === sItem.se_id && lr_ref[2] === sItem.school_id) {
-                            return sItem;
-                        }
-                    })
-                    kItem = { ...kItem, "ldr_name": ldr_info1[0].ledger_name }
+                    // $ldr_info1 = res_students.filter((sItem) => {
+                    //     if (lr_ref[0] === sItem.se_id && lr_ref[2] === sItem.school_id) {
+                    //         return sItem;
+                    //     }
+                    // })
+                     $ldr_info1 = return array_filter($res_students, function($item){
+                        if($lr_ref[0] === $item['se_id'] && $lr_ref[2] === $item['school_id']){
+                            return true;
+                        };
+                    });
+
+                    $kItem = { ...$kItem, "ldr_name": $ldr_info1[0]['ledger_name'] }
             }
-            return kItem;
+            return $kItem;
         })
-        detaild_ldr = [...detaild_ldr, ..._newLdr];
+        $detaild_ldr = array_merge($detaild_ldr, $_newLdr);
         // return _newLdr
     });
 
-    return detaild_ldr
+    return $detaild_ldr;
 }
-// let ldr_data = getGroupWiseDetailBalanceSheet($obj);
+// $ldr_data = getGroupWiseDetailBalanceSheet($obj);
 // allGrp => All Groups, ldr_data => all ledger data
 // all voucher entries.....
 // console.log({ "All Voucher Entries": ldr_data });
@@ -251,79 +336,83 @@ function getGroupWiseDetailBalanceSheet($obj) {
 
 // get merge all ledges (normal + students + staff + other);
 function mergeAllLedgers($obj) {
-    let merged_ledger = [];
-    $_ledger = $obj.acc_ledgers;
-    $_students = $obj.students;
-    $_professionals = $obj.professional;
-    $_updated_ledger = _ledger.map((l_item) => {
-        l_item = { ...l_item, "type": "LDR", "ldr_ref_id": l_item.id + "_LDR_" + l_item.school_id }
-        return l_item
+    $merged_ledger = [];
+    $_ledger = $obj['acc_ledgers'];
+    $_students = $obj['students'];
+    $_professionals = $obj['professional'];
+    $_updated_ledger = array();
+    foreach($_ledger as $l_item) {
+        $l_item = { ...$l_item, "type": "LDR", "ldr_ref_id": $l_item['id'] + "_LDR_" + $l_item['school_id'] }
+        return $l_item;
     })
-    $_stu_data = _students.map((s_item) => {
-        $ldr_name = s_item.student_name + ' S/o ' + s_item.father_name + ' [' + s_item.admission_number + '/' + s_item.stu_class + ']';
+    $_stu_data = array();
+    foreach($_students as $s_item) {
+        $ldr_name = $s_item.student_name + ' S/o ' + $s_item['father_name'] + ' [' + $s_item['admission_number'] + '/' + $s_item['stu_class'] + ']';
         $_single_stu = {
-            "id": s_item.se_id,
-            "school_id": s_item.school_id,
+            "id": $s_item['se_id'],
+            "school_id": $s_item['school_id'],
             "under_group": 10,
             "group_type": "P",
-            "ledger_name": ldr_name,
+            "ledger_name": $ldr_name,
             "Alias": null,
             "ledger_type": "P",
             "server_date_time": null,
             "type": "STU",
-            "ldr_ref_id": s_item.se_id + "_STU_" + s_item.school_id
+            "ldr_ref_id": $s_item['se_id'] + "_STU_" + $s_item['school_id']
         };
-        return _single_stu
+        return $_single_stu;
     });
 
-    $_stf_data = _professionals.map((s_item) => {
-        $ldr_name = s_item.emp_name + ' S/o ' + s_item.emp_f_name;
+    $_stf_data = array();
+    foreach($_professionals as $s_item){
+        $ldr_name = $s_item['emp_name'] + ' S/o ' + $s_item['emp_f_name'];
         $_single_stu = {
-            "id": s_item.se_id,
-            "school_id": s_item.school_id,
+            "id": $s_item['se_id'],
+            "school_id": $s_item['school_id'],
             "under_group": 11,
             "group_type": "P",
-            "ledger_name": ldr_name,
+            "ledger_name": $ldr_name,
             "Alias": null,
             "ledger_type": "P",
             "server_date_time": null,
             "type": "STF",
-            "ldr_ref_id": s_item.s_id + "_STF_" + s_item.school_id
+            "ldr_ref_id": $s_item['s_id'] + "_STF_" + $s_item['school_id']
         };
-        return _single_stu
+        return $_single_stu;
     });
 
     // console.log(merged_ledger);
-    return merged_ledger = [..._updated_ledger, ..._stu_data, ..._stf_data];
+    return $merged_ledger = array_merge($_updated_ledger, $_stu_data, $_stf_data);
 }
-// let compoundLedgers = mergeAllLedgers(ldr_data, $obj);
+// $compoundLedgers = mergeAllLedgers(ldr_data, $obj);
 // // $obj => $obj, ldr_data => all ledger data
 // console.log({ "All Ledgers": compoundLedgers });
 
-function getFinalBalanceofLedgers(data, ledgers) {
+function getFinalBalanceofLedgers($data, $ledgers) {
 
-    $updated_ledger = ledgers.map((l_item) => {
+    $updated_ledger = array();
+    foreach($ledgers as $l_item) {
         $_related_data = data.filter((d_item) => {
             if (l_item.ldr_ref_id === d_item.ldr_ref_id) {
                 return d_item
             }
         });
-        let cr_amo = 0;
-        let dr_amo = 0;
+        $cr_amo = 0;
+        $dr_amo = 0;
 
-        _related_data.map((vItem) => {
-            if (vItem.tr_type === "CR") {
-                cr_amo += Number(vItem.tr_amount)
+        foreach($_related_data as $vItem) {
+            if ($vItem['tr_type'] === "CR") {
+                $cr_amo += Number($vItem['tr_amount'])
             } else {
-                dr_amo += Number(vItem.tr_amount)
+                $dr_amo += Number($vItem['tr_amount'])
             }
         })
 
-        return l_item = { ...l_item, "cl_blnc": Math.abs(cr_amo - dr_amo), "blnc_type": (cr_amo <= dr_amo) ? "DR" : "CR" };
+        return $l_item = { ...$l_item, "cl_blnc": Math.abs($cr_amo - $dr_amo), "blnc_type": ($cr_amo <= $dr_amo) ? "DR" : "CR" };
     });
-    return updated_ledger;
+    return $updated_ledger;
 }
-// let final_balance = getFinalBalanceofLedgers(ldr_data, compoundLedgers);
+// $final_balance = getFinalBalanceofLedgers(ldr_data, compoundLedgers);
 // // ldr_data => all voucher entrys data
 // // compoundLedgers => All ledgers (students, fee, staff, and other), 
 // console.log({ "Ledger wise Balance": final_balance });
