@@ -1,0 +1,484 @@
+import React, { Component } from 'react';
+import { withRouter } from 'react-router';
+import { Helmet } from "react-helmet";
+// import { NavLink } from 'react-router-dom';
+import { connect } from 'react-redux';
+import {
+  accLedgerActions, professionalAction,
+  accGroupActions, accLedgerEntryActions, studentsAction
+} from '../_actions';
+import { isEmptyObj, isEmpty, checkEntryType } from '../utility/utilities';
+
+// import CommonFilters from '../utility/Filter/filter-schools';
+
+class ReceiptVoucher extends Component {
+  state = {
+    formIsHalfFilledOut: false,
+    voucherSummary: {},
+    cursor: 0,
+    filter_data: [],
+    current_ldr: '',
+    vchr_type : "Journal",
+    voucher: { "vch_no": "3163", "credit": [{ "ldr_ref_id": "5_LDR_4", "tr_amount": "45", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Fee Discount" }, { "ldr_ref_id": "1_LDR_4", "tr_amount": "54", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Profit & Loss A/c" }, { "ldr_ref_id": "6_LDR_4", "tr_amount": "45", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Teaching Staff Salary" }, { "ldr_ref_id": "9_LDR_4", "tr_amount": "545", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Exam Fee" }, { "ldr_ref_id": "14_LDR_4", "tr_amount": "54", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Registration Fee" }], "debit": [{ "ldr_ref_id": "49_STU_4", "tr_amount": 743, "tr_type": "DR", "under_grp_id": "10", "under_grp_type": "P", "ledger_name": "AASHISH MEENA S/o RAMBABU MEENA [141/Fourth]" }], "total_amo": 743, "narration": "AASHISH MEENA S/o RAMBABU MEENA Total Due is Rs. 743.", "vchr_type": "Journal" },
+    single_voucer: {
+      vchr_date: new Date(),
+      narration: "test",
+      cr_total: 1000,
+      dr_total: 1000,
+      vcr_data: {
+        ldr_total: 1000,
+        ldr_t_type: "Cr",
+        child: [
+          {
+            ldr_type: "Cr",
+            ldr_name: "abc & xyz",
+            cr_amo: 0,
+            dr_amo: 1000,
+          }
+        ]
+      },
+      vdr_data: {
+        ldr_total: 1000,
+        ldr_t_type: "Dr",
+        child: [
+          {
+            ldr_type: "Dr",
+            ldr_name: "Fee Collection",
+            cr_amo: 1000,
+            dr_amo: 0,
+          },
+          {
+            ldr_type: "Dr",
+            ldr_name: "Fee transpoart",
+            cr_amo: 1000,
+            dr_amo: 0,
+          },
+        ]
+      },
+    }
+  }
+
+  setArraowKeysHandler() {
+    document.addEventListener('keydown', (e) => {
+      switch (e.keyCoce) {
+        case 37:
+          console.log('left');
+          this.handleKeyDown("left");
+          break;
+        case 38:
+          console.log('up');
+          this.handleKeyDown("up");
+          break;
+        case 39:
+          console.log('right');
+          this.handleKeyDown("right");
+          break;
+        case 40:
+          console.log('down');
+          this.handleKeyDown("down");
+          break;
+        default:
+          console.log('something wrong');
+      }
+    });
+  }
+
+  handleKeyDown = (key) => {
+    const { cursor, filter_data } = this.state
+    // arrow up/down button should select next/previous list element
+    if ((key === "up" || key === "left") && cursor > 0) {
+      this.setState(prevState => ({
+        cursor: prevState.cursor - 1
+      }))
+    } else if ((key === "down" || key === "right") && cursor < filter_data.length - 1) {
+      this.setState(prevState => ({
+        cursor: prevState.cursor + 1
+      }))
+    }
+  }
+
+  filterDataHandler = (e) => {
+    debugger
+    const val = e.target.value.toUpperCase();
+    const  ldr_list  = this.state.effected_right_ldr;
+    const filtered_data = ldr_list.filter((elem) => {
+      const _elem = elem.ledger_name.toUpperCase();
+      if (!_elem.includes(val)) {
+        return false
+      }
+      return elem
+    })
+    // console.log(filtered_data);
+    this.setState({
+      filter_data: filtered_data
+    }, () => {
+      // this.handleKeyDown(e)
+    })
+  }
+
+  changeHandler = (event, fieldName, isCheckbox, indexNo) => {
+    if (fieldName === 'left_ldr_type') {
+      debugger;
+      const _val = checkEntryType(event);
+      let sv = JSON.parse(JSON.stringify(this.state.voucher));
+      sv.credit[indexNo].tr_type = _val;
+      this.setState({
+        voucher: sv
+      })
+    } else if (fieldName === 'left_ldr_name') {
+      this.filterDataHandler(event);
+      
+    } else if (fieldName === 'medium') {
+      this.classFilterByMediumHandler();
+    } else {
+      this.setState({
+        [fieldName]: isCheckbox ? event.target.checked : event.target.value,
+        formIsHalfFilledOut: true
+      })
+    }
+  };
+
+  blurHandler = (event, fieldName, isCheckbox, indexNo) => {
+    const _val = event.target.value;
+    if (fieldName === 'left_ldr_type') {
+      if (_val === "Cr" || _val === "CR") {
+        // const efected_group = [10];
+        // this.effectedLedgerHandler(_val, efected_group);
+      } else if (_val === "Dr" || _val === "DR") {
+        // const efected_group = [11];
+        // this.effectedLedgerHandler(_val, efected_group);
+      } else {
+        event.target.focus();
+      }
+    }
+  };
+
+  ledgerListHandler = (event, fieldName, isCheckbox, indexNo) => {
+    if (fieldName === 'left_ldr_name') {
+      this.setState({
+        filter_data : this.state.efctd_cr_ldr
+      })
+    } else if (fieldName === "right_ldr_name") {
+        this.setState({
+          filter_data : this.state.efctd_dr_ldr
+        })
+    }
+  }
+  blurLedgerListHandler = (event, fieldName, isCheckbox, indexNo) => {
+    this.setState({
+      effected_left_ldr: '',
+      effected_right_ldr: '',
+    })
+  }
+  effectedLedgerHandler(efected_group) {
+    // debugger
+    let ldr_left = [];
+    let ldr_right = [];
+    const _chr_type = this.state.vchr_type;
+    
+    switch(_chr_type){
+        case "Payment":
+        // code
+          ldr_left = [10];
+          ldr_right = [11];
+
+      break;
+      case "Receipt":
+      // code
+      break;
+      default:
+      // code
+          ldr_left = [10];
+          ldr_right = [11];
+    }
+    const { all_ledgers } = this.props.accountManager;
+    let efctd_cr_ldr = [];
+    let efctd_dr_ldr = [];
+    
+    ldr_left.forEach(el => {
+      efctd_cr_ldr.push(all_ledgers.filter(e => Number(e.under_group) === el))
+    });
+
+    ldr_right.forEach(el => {
+      efctd_dr_ldr.push(all_ledgers.filter(e => Number(e.under_group) === el))
+    })
+
+    this.setState({
+      effected_left_ldr: efctd_cr_ldr[0],
+      effected_right_ldr: efctd_dr_ldr[0]
+    })
+  }
+
+  componentDidMount() {
+    this.checkFlag();
+  }
+
+
+  checkFlag() {
+    setTimeout(() => {
+      const _filter = this.props.filteredSchoolData;
+      const _all_student = this.props.students;
+      const _accGroup = this.props.accGroup;
+      const _all_professional = this.props.professional;
+      const _accLedgerEntry = this.props.accLedgerEntry;
+      if (_all_student && _all_professional && _filter && _accGroup && _accLedgerEntry) {
+        this.filterBySchoolHandler();
+      } else {
+        this.checkFlag()
+      }
+    }, 100);
+  }
+
+  filterBySchoolHandler = () => {
+    const _filter = this.props.filteredSchoolData;
+    // const _all_student = this.props.students;
+    if (!isEmpty(_filter)) {
+      // const _school_student = _all_student.filter((item) => {
+      //   if (_filter.slct_school_id) {
+      //     if (item.school_id === _filter.slct_school_id) {
+      //       return item
+      //     }
+      //   } else {
+      //     return item
+      //   }
+      // })
+      this.setState({
+        // display_student: _school_student,
+      }, 
+      // () => this.filterByClsHandler();
+      () => this.effectedLedgerHandler()
+      )
+    }
+  }
+  
+
+  filterByClsHandler = () => {
+    // const _fltr_school = this.props.filteredSchoolData;
+    // const _fltr_class = this.props.filteredClassesData;
+    // if (_all_student) {
+    //   const _school_student = _all_student.filter((item) => {
+    //     if (!isEmpty(_fltr_class.slct_cls_name)) {
+    //       if (item.school_id === _fltr_school.slct_school_id &&
+    //         item.stu_class === _fltr_class.slct_cls_name) {
+    //         return item
+    //       }
+    //     } else {
+    //       if (item.school_id === _fltr_school.slct_school_id) {
+    //         return item
+    //       }
+    //     }
+    //   })
+    // }
+  }
+
+  render() {
+    const { user } = this.props;
+    const { single_voucer: sv, voucher, filter_data } = this.state;
+    console.log(this.state);
+    return (
+      <div className="page-content">
+        <Helmet>
+          <title>Accounting Voucher</title>
+        </Helmet>
+        <div className="page-bar d-flex">
+          <div className="page-title"> Receipt Voucher</div>
+        </div>
+        {(user && sv) && voucher &&
+          <div className="card card-box sfpage-cover light-trans">
+            <div className="card-body p-1 sfpage-body">
+              <div className="acc-page page-receipt-voucher">
+                {filter_data &&
+                  <div className="list-accunts">
+                    <div className="list-acc-head">List of Ledger Accunts</div>
+                    <div className="list-acc-body">
+                      <ul>
+                        {filter_data.map((item, index) => {
+                          return (
+                            <li key={index}>{item.ledger_name}</li>
+                          )
+                        })}
+                      </ul>
+                    </div>
+                    <div className="list-acc-footer">more...</div>
+                  </div>
+                }
+                <div className="acc-page-head container-fluid">
+                  <div className="sec-title">
+                    <div className="title-zone">Particulars</div>
+                    <div className="info-zone">
+                      <div className="info-zone">
+                        <table className="table table-bordered table-sm">
+                          <tbody>
+                            <tr>
+                              <td>
+                                <div className="dr-title">Debit</div>
+                              </td>
+                              <td>
+                                <div className="cr-title">Credit</div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="acc-page-body container-fluid">
+                  <div className="av-detail-zone">
+                    {voucher.credit.map((item, index) => {
+                      return (
+                        <div className="av-detail-head" key={index}>
+                          <div className="main-head" >
+                            <div className="head-name d-flex">
+                              <span className="txt-normal mr-2">
+                                <input type="text"
+                                  value={item.tr_type}
+                                  maxLength="2"
+                                  className="form-control trans-input tr-type form-control-sm"
+                                  onChange={event => this.changeHandler(event, `left_ldr_type`, null, index)}
+                                  onBlur={event => this.blurHandler(event, `left_ldr_type`, null, index)}
+                                />
+                              </span>
+                              <input type="text"
+                                value={item.ledger_name}
+                                className="form-control trans-input tr-name form-control-sm"
+                                onChange={event => this.changeHandler(event, `left_ldr_name`, null, index)}
+                                onFocus={event => this.ledgerListHandler(event, `left_ldr_name`, null, index)}
+                                onBlur={event => this.blurLedgerListHandler(event, `left_ldr_name`, null, index)}
+                                
+                              // onClick={() => this.effectedLedgerHandler([10])}
+                              />
+                            </div>
+                            <div className="head-amount">
+                              <div className="dr-total">
+                                {(item.tr_type == "CR") ?
+                                  <input type="text"
+                                    value={item.tr_amount}
+                                    className="form-control trans-input tr-amount form-control-sm"
+                                    onChange={event => this.changeHandler(event, `left_dr_amo`, null, index)}
+                                  />
+                                  : null}
+                              </div>
+                              <div className="cr-total">
+                                {(item.tr_type == "DR") ?
+                                  <input type="text"
+                                    value={item.tr_amount}
+                                    className="form-control trans-input tr-amount form-control-sm"
+                                    onChange={event => this.changeHandler(event, `left_cr_amo`, null, index)}
+                                  />
+                                  : null}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="crnt-balance-head">
+                            <div className="bal-head"><span className="txt-normal">Cur Bal :</span> {item.ldr_ref_id}</div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                    {voucher.debit.map((item, index) => {
+                      return (
+                        <div className="av-detail-head" key={index}>
+                          <div className="main-head" >
+                            <div className="head-name d-flex">
+                              <span className="txt-normal mr-2">
+                                <input type="text"
+                                  value={item.tr_type}
+                                  maxLength="2"
+                                  className="form-control trans-input tr-type form-control-sm"
+                                  onChange={event => this.changeHandler(event, `left_ldr_type`, null, index)}
+                                  onBlur={event => this.blurHandler(event, `left_ldr_type`, null, index)}
+                                />
+                              </span>
+                              <input type="text"
+                                value={item.ledger_name}
+                                className="form-control trans-input tr-name form-control-sm"
+                                onChange={event => this.changeHandler(event, `left_ldr_name`, null, index)}
+                              // onClick={() => this.effectedLedgerHandler([10])}
+                              />
+                            </div>
+                            <div className="head-amount">
+                              <div className="dr-total">
+                                {(item.tr_type == "CR") ?
+                                  <input type="text"
+                                    value={item.tr_amount}
+                                    className="form-control trans-input tr-amount form-control-sm"
+                                    onChange={event => this.changeHandler(event, `left_dr_amo`, null, index)}
+                                  />
+                                  : null}
+                              </div>
+                              <div className="cr-total">
+                                {(item.tr_type == "DR") ?
+                                  <input type="text"
+                                    value={item.tr_amount}
+                                    className="form-control trans-input tr-amount form-control-sm"
+                                    onChange={event => this.changeHandler(event, `left_cr_amo`, null, index)}
+                                  />
+                                  : null}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="crnt-balance-head">
+                            <div className="bal-head"><span className="txt-normal">Cur Bal :</span> {item.ldr_ref_id}</div>
+                          </div>
+                        </div>
+                      )
+                    })}
+
+
+                    {/* <div className="av-detail-head">
+                      <div className="main-head">
+                        <div className="head-name"><span className="txt-normal">Dr </span> Fees</div>
+                        <div className="head-amount">
+                          <div className="dr-total"></div>
+                          <div className="cr-total">500.00</div>
+                        </div>
+                      </div>
+                      <div className="crnt-balance-head">
+                        <div className="bal-head"><span className="txt-normal">Cur Bal :</span> 10,000 Dr</div>
+                      </div>
+                    </div> */}
+                  </div>
+
+                </div>
+                <div className="acc-page-footer av-page-footer container-fluid">
+                  <div className="sec-foot">
+                    <div className="narration-zone">
+                      <div className="title">Narration:</div>
+                      <textarea
+                        value={voucher.narration}
+                        onChange={event => this.changeHandler(event, `narration`)}
+                        className="form-control" >
+
+                      </textarea>
+                    </div>
+                    <div className="amount-zone">
+                      <div className="dr-total">{voucher.total_amo}</div>
+                      <div className="cr-total">{voucher.total_amo}</div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        }
+      </div >
+    )
+  }
+}
+function mapStateToProps(state) {
+  const { item: user } = state.authentication;
+  const filteredSchoolData = state.filteredSchoolData;
+  const filteredClassesData = state.filteredClassesData;
+  const { item: accountManager } = state.accountManager;
+  return {
+    user, accountManager,
+    filteredSchoolData, filteredClassesData
+  };
+}
+
+const actionCreators = {
+}
+
+export default connect(mapStateToProps, actionCreators)(withRouter(ReceiptVoucher));
