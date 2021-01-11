@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  input:focus,
+  li.selected {background:yellow}
+</style>
+</head>
+<body>
+  
+<div class="abc">
+  <input type="text" tabindex="1" maxlength="2""/>
+  <input type="text" tabindex="2" maxlength="2""/>
+  <input type="text" tabindex="3" maxlength="2""/>
+  <input type="text" tabindex="4" maxlength="2""/>
+  <input type="text" tabindex="5" maxlength="2""/>
+</div>
+<input type="text" tabindex="1" maxlength="2""/>
+ 
+<script type="text/javascript">
+ 
+const allinput = Array.prototype.slice.call(document.querySelector('.abc').querySelectorAll("input"));
+// console.log(allinput);
+ 
+function tabHandler(ev){
+  ev.preventDefault();
+  const _ti = ev.target.tabIndex;
+  let nextTi = '';
+  if ((ev.shiftKey && ev.key === 'Tab') || (ev.shiftKey && ev.key === 'Enter') ) {
+      nextTi = (_ti === 1) ? allinput.length : (_ti === allinput.length) ? allinput.length - 1 : _ti - 1 ;
+    } else {
+      nextTi = (_ti === allinput.length) ? 1 : _ti+1 ;
+  }
+  
+  const _input = `input[tabIndex='`+(nextTi)+`']`;
+  document.querySelector(_input).focus();
+
+}
+
+function tabHandler1(ev){
+  ev.preventDefault();
+  const _ti = ev.target;
+  let _ci = '';
+  allinput.map((item, inx)=>{ if(item === _ti){_ci = inx;}});
+  
+  let nextTi = '';
+  if ((ev.shiftKey && ev.key === 'Tab') || (ev.shiftKey && ev.key === 'Enter') ) {
+      nextTi = (_ci === 0) ? allinput.length - 1  : _ci - 1;
+    } else {
+      nextTi = (_ci === allinput.length) ? 0 : (_ci === (allinput.length - 1)) ? 0 : _ci + 1 ;
+  }
+  (allinput[nextTi]).focus();
+}
+
+document.addEventListener('keydown', (e) => {
+  switch (e.keyCode) {
+          case 13:
+              // console.log('Enter');
+              this.tabHandler(e);
+          case 9:
+              // console.log('Tab');
+              this.tabHandler(e);
+          break;
+      }
+  });
+  
+</script>
+</body>
+</html>
