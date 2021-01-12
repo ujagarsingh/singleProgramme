@@ -26,7 +26,7 @@ class ReceiptVoucher extends Component {
         { "ldr_ref_id": "6_LDR_4", "tr_amount": "45", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Teaching Staff Salary" },
         { "ldr_ref_id": "9_LDR_4", "tr_amount": "545", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Exam Fee" },
         { "ldr_ref_id": "14_LDR_4", "tr_amount": "54", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Registration Fee" },
-        { "ldr_ref_id": "49_STU_4", "tr_amount": 743, "tr_type": "DR", "under_grp_id": "10", "under_grp_type": "P", "ledger_name": "AASHISH MEENA S/o RAMBABU MEENA [141/Fourth]" }],
+        { "ldr_ref_id": "49_STU_4", "tr_amount": "743", "tr_type": "DR", "under_grp_id": "10", "under_grp_type": "P", "ledger_name": "AASHISH MEENA S/o RAMBABU MEENA [141/Fourth]" }],
       "cr_total_amo": 743, "dr_total_amo": 743, "narration": "AASHISH MEENA S/o RAMBABU MEENA Total Due is Rs. 743.", "vchr_type": "Journal"
     },
     vchr_date: new Date(),
@@ -268,7 +268,19 @@ class ReceiptVoucher extends Component {
 
   checkEntriesHandler(ev) {
     let sv = JSON.parse(JSON.stringify(this.state.voucher));
-    sv.child.push({ ldr_ref_id: "", tr_amount: "", tr_type: "CR", ledger_name: "" })
+    debugger;
+    let total_cr = 0;
+    let total_dr = 0;
+    sv.child.forEach(elem =>{
+      if((elem.tr_type).toUpperCase() === "CR"){
+        total_cr += Number(elem.tr_amount);
+      } else {
+        total_dr += Number(elem.tr_amount);
+      }
+    });
+    sv['cr_total_amo'] = total_cr;
+    sv['dr_total_amo'] = total_dr;
+    sv.child.push({ ldr_ref_id: "", tr_amount: Math.abs(total_cr - total_dr), tr_type: (total_cr < total_dr) ? "CR" : "DR", ledger_name: "" })
     this.setState({
       voucher: sv
     }, () => this.tabAndEnterHandler(ev))
