@@ -7,7 +7,8 @@ import {
   accLedgerActions, professionalAction,
   accGroupActions, accLedgerEntryActions, studentsAction
 } from '../_actions';
-import { isEmptyObj, isEmpty, checkEntryType } from '../utility/utilities';
+import { isEmptyObj, isEmpty, checkEntryType, getAllInputs } from '../utility/utilities';
+import { events } from '../_reducers/events.reducer';
 
 // import CommonFilters from '../utility/Filter/filter-schools';
 
@@ -18,7 +19,16 @@ class ReceiptVoucher extends Component {
     filter_data: [],
     current_ldr: '',
     vchr_type: "Journal",
-    voucher: { "vch_no": "3163", "credit": [{ "ldr_ref_id": "5_LDR_4", "tr_amount": "45", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Fee Discount" }, { "ldr_ref_id": "1_LDR_4", "tr_amount": "54", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Profit & Loss A/c" }, { "ldr_ref_id": "6_LDR_4", "tr_amount": "45", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Teaching Staff Salary" }, { "ldr_ref_id": "9_LDR_4", "tr_amount": "545", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Exam Fee" }, { "ldr_ref_id": "14_LDR_4", "tr_amount": "54", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Registration Fee" }], "debit": [{ "ldr_ref_id": "49_STU_4", "tr_amount": 743, "tr_type": "DR", "under_grp_id": "10", "under_grp_type": "P", "ledger_name": "AASHISH MEENA S/o RAMBABU MEENA [141/Fourth]" }], "total_amo": 743, "narration": "AASHISH MEENA S/o RAMBABU MEENA Total Due is Rs. 743.", "vchr_type": "Journal" },
+    voucher: {
+      "vch_no": "3163", "child": [
+        { "ldr_ref_id": "5_LDR_4", "tr_amount": "45", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Fee Discount" },
+        { "ldr_ref_id": "1_LDR_4", "tr_amount": "54", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Profit & Loss A/c" },
+        { "ldr_ref_id": "6_LDR_4", "tr_amount": "45", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Teaching Staff Salary" },
+        { "ldr_ref_id": "9_LDR_4", "tr_amount": "545", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Exam Fee" },
+        { "ldr_ref_id": "14_LDR_4", "tr_amount": "54", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Registration Fee" },
+        { "ldr_ref_id": "49_STU_4", "tr_amount": 743, "tr_type": "DR", "under_grp_id": "10", "under_grp_type": "P", "ledger_name": "AASHISH MEENA S/o RAMBABU MEENA [141/Fourth]" }],
+      "cr_total_amo": 743, "dr_total_amo": 743, "narration": "AASHISH MEENA S/o RAMBABU MEENA Total Due is Rs. 743.", "vchr_type": "Journal"
+    },
     vchr_date: new Date(),
   }
 
@@ -26,24 +36,29 @@ class ReceiptVoucher extends Component {
     document.addEventListener('keydown', (e) => {
       switch (e.keyCode) {
         case 37:
-          console.log('left');
+          // console.log('left');
           this.handleKeyDown("left");
           break;
         case 38:
-          console.log('up');
+          // console.log('up');
           this.handleKeyDown("up");
           break;
         case 39:
-          console.log('right');
+          // console.log('right');
           this.handleKeyDown("right");
           break;
         case 40:
-          console.log('down');
+          // console.log('down');
           this.handleKeyDown("down");
           break;
         case 13:
-          console.log('Enter');
+          // console.log('Enter');
           this.chooseLedgerHandler();
+          this.tabAndEnterHandler(e);
+          break;
+        case 9:
+          // console.log('Tab');
+          this.tabAndEnterHandler(e);
           break;
         default:
           console.log('something wrong');
@@ -52,32 +67,17 @@ class ReceiptVoucher extends Component {
   }
 
   chooseLedgerHandler() {
-    debugger
-    // current_grp: "credit"
-    // current_inx: 0
-    // cursor: 4
-    // "ldr_ref_id": "5_LDR_4", "tr_amount": "45", "tr_type": "CR", "under_grp_id": "2", "under_grp_type": "P", "ledger_name": "Fee Discount"
+    // debugger
 
-    // Alias: null
-    // group_type: "P"
-    // id: "108"
-    // ldr_ref_id: "108_STU_4"
-    // ledger_name: "AMAN MEENA S/o HARI NARAYAN MEENA [366/Eigth]"
-    // ledger_type: "P"
-    // school_id: "4"
-    // server_date_time: null
-    // type: "STU"
-    // under_group: 10
-
-    const { filter_data, cursor, current_grp, current_inx } = this.state;
+    const { filter_data, cursor, current_inx } = this.state;
     const current_ldr = filter_data[cursor];
     console.log(current_ldr);
     if (!isEmptyObj(current_ldr)) {
       let sv = this.state.voucher;
-      sv[current_grp][current_inx]['ldr_ref_id'] = current_ldr['ldr_ref_id'];
-      // sv[current_grp][current_inx]['under_grp_id'] = current_ldr['under_grp_id'];
-      // sv[current_grp][current_inx]['under_grp_type'] = current_ldr['under_grp_type'];
-      sv[current_grp][current_inx]['ledger_name'] = current_ldr['ledger_name'];
+      sv.child[current_inx]['ldr_ref_id'] = current_ldr['ldr_ref_id'];
+      // sv.child[current_inx]['under_grp_id'] = current_ldr['under_grp_id'];
+      // sv.child[current_inx]['under_grp_type'] = current_ldr['under_grp_type'];
+      sv.child[current_inx]['ledger_name'] = current_ldr['ledger_name'];
       this.setState({
         voucher: sv
       })
@@ -100,24 +100,18 @@ class ReceiptVoucher extends Component {
 
 
 
-  changeHandler = (event, fieldName, isCheckbox, indexNo) => {
-    if (fieldName === 'left_ldr_type') {
+  changeHandler = (event, fieldName, isCheckbox, indexNo, trType) => {
+    debugger
+    if (fieldName === 'ldr_type') {
       // debugger;
       const _val = checkEntryType(event);
       let sv = JSON.parse(JSON.stringify(this.state.voucher));
-      sv.credit[indexNo].tr_type = _val;
+      sv.child[indexNo].tr_type = _val;
       this.setState({ voucher: sv })
-    } else if (fieldName === 'right_ldr_type') {
-      // debugger;
-      const _val = checkEntryType(event);
-      let sv = JSON.parse(JSON.stringify(this.state.voucher));
-      sv.debit[indexNo].tr_type = _val;
-      this.setState({ voucher: sv })
-    } else if (fieldName === 'credit' || fieldName === 'debit') {
+    } else if (fieldName === 'ldr_name') {
       this.filterDataHandler(event, fieldName, indexNo);
-    } else if (fieldName === 'credit_amo' || fieldName === 'debit_amo') {
-      const tr_side = (fieldName === 'credit_amo') ? 'credit' : 'debit';
-      this.updateTransetionAmountHandler(event, tr_side, indexNo);
+    } else if (fieldName === 'ldr_amo') {
+      this.updateTransetionAmountHandler(event, indexNo, trType);
     } else {
       this.setState({
         [fieldName]: isCheckbox ? event.target.checked : event.target.value,
@@ -126,23 +120,24 @@ class ReceiptVoucher extends Component {
     }
   };
 
-  updateTransetionAmountHandler(e, fieldName, indexNo){
+  updateTransetionAmountHandler(e, indexNo, trType) {
     // let sv = JSON.parse(JSON.stringify(this.state.voucher));
     let sv = this.state.voucher;
     const _val = e.target.value;
-    sv[fieldName][indexNo].tr_amount = _val;
+    sv.child[indexNo].tr_amount = _val;
     this.setState({
-        voucher: sv
-      })
+      voucher: sv,
+      tr_type: trType
+    })
   }
 
   filterDataHandler = (e, fieldName, indexNo) => {
     // debugger
     let sv = JSON.parse(JSON.stringify(this.state.voucher));
     const _val = e.target.value;
-    sv[fieldName][indexNo].ledger_name = _val;
+    sv.child[indexNo].ledger_name = _val;
 
-    const ldr_list = (fieldName === "credit") ? "effected_left_ldr" : "effected_right_ldr";
+    const ldr_list = (e.target.getAttribute('data-type') === "CR") ? "effected_left_ldr" : "effected_right_ldr";
 
     const _ldr_list = JSON.parse(JSON.stringify(this.state[ldr_list]));
     const val = _val.toUpperCase();
@@ -166,24 +161,22 @@ class ReceiptVoucher extends Component {
 
   blurHandler = (event, fieldName, isCheckbox, indexNo) => {
     const _val = event.target.value;
-    if (fieldName === 'left_ldr_type') {
-      if (_val === "Cr" || _val === "CR") {
-        // const efected_group = [10];
-        // this.effectedLedgerHandler(_val, efected_group);
-      } else if (_val === "Dr" || _val === "DR") {
-        // const efected_group = [11];
-        // this.effectedLedgerHandler(_val, efected_group);
+    if (fieldName === 'ldr_type') {
+      if (_val === "Cr" || _val === "CR" || _val === "Dr" || _val === "DR") {
+
       } else {
         event.target.focus();
       }
-    } else if (fieldName === 'right_ldr_type') {
-      if (_val === "Cr" || _val === "CR") {
-        // const efected_group = [10];
-        // this.effectedLedgerHandler(_val, efected_group);
-      } else if (_val === "Dr" || _val === "DR") {
-        // const efected_group = [11];
-        // this.effectedLedgerHandler(_val, efected_group);
+    } else if (fieldName === 'ldr_name') {
+      if (isEmpty(_val)) {
+        event.target.focus();
       } else {
+        this.setState({
+          filter_data: []
+        })
+      }
+    } else if (fieldName === 'ldr_amo') {
+      if (isEmpty(_val)) {
         event.target.focus();
       }
     }
@@ -191,24 +184,22 @@ class ReceiptVoucher extends Component {
 
   ledgerListHandler = (event, fieldName, isCheckbox, indexNo) => {
     // debugger
-    if (fieldName === 'credit') {
+    const ldr_list = event.target.getAttribute('data-type');
+
+    if (ldr_list === "CR") {
       this.setState({
         filter_data: this.state.effected_left_ldr,
-        current_grp: fieldName,
         current_inx: indexNo,
       })
-    } else if (fieldName === "debit") {
+    } else if (ldr_list === "DR") {
       this.setState({
         filter_data: this.state.effected_right_ldr,
-        current_grp: fieldName,
         current_inx: indexNo,
       })
     }
   }
   afterSelectLedgerHandler = (event, fieldName, isCheckbox, indexNo) => {
-    this.setState({
-      filter_data: []
-    })
+
   }
   effectedLedgerHandler() {
     // debugger
@@ -251,13 +242,45 @@ class ReceiptVoucher extends Component {
     })
   }
 
+  tabAndEnterHandler(ev) {
+    ev.preventDefault();
+    // const allinput = (!isEmpty(this.state.allinput) || this.state.allinput === 'undefined') ? getAllInputs() : this.state.allinput;
+    const allinput = getAllInputs();
+    const _ti = ev.target;
+    let _ci = '';
+    allinput.map((item, inx) => { if (item === _ti) { _ci = inx; } });
+
+    let nextTi = '';
+    if ((ev.shiftKey && ev.key === 'Tab') || (ev.shiftKey && ev.key === 'Enter')) {
+      nextTi = (_ci === 0) ? allinput.length - 1 : _ci - 1;
+    } else {
+      nextTi = (_ci === allinput.length) ? 0 : (_ci === (allinput.length - 1)) ? 0 : _ci + 1;
+    }
+    if (nextTi === (allinput.length - 1)) {
+      console.log("last");
+      this.checkEntriesHandler(ev);
+    } else if (nextTi === 1) {
+      console.log("first")
+    } else {
+      (allinput[nextTi]).focus();
+    }
+  }
+
+  checkEntriesHandler(ev) {
+    let sv = JSON.parse(JSON.stringify(this.state.voucher));
+    sv.child.push({ ldr_ref_id: "", tr_amount: "", tr_type: "CR", ledger_name: "" })
+    this.setState({
+      voucher: sv
+    }, () => this.tabAndEnterHandler(ev))
+  };
+
   componentDidMount() {
     this.effectedLedgerHandler();
     this.setArraowKeysHandler();
   }
 
   render() {
-    const { user } = this.props;
+    const { user, accountManager } = this.props;
     const { voucher, filter_data, cursor } = this.state;
     console.log(this.state);
     return (
@@ -268,7 +291,7 @@ class ReceiptVoucher extends Component {
         <div className="page-bar d-flex">
           <div className="page-title"> Receipt Voucher</div>
         </div>
-        {user && voucher &&
+        {user && voucher && accountManager &&
           <div className="card card-box sfpage-cover light-trans">
             <div className="card-body p-1 sfpage-body">
               <div className="acc-page page-receipt-voucher">
@@ -281,7 +304,7 @@ class ReceiptVoucher extends Component {
                           return (
                             <li
                               className={cursor === index ? 'active' : null}
-                              key={index}                              >
+                              key={index}>
                               {item.ledger_name}
                             </li>
                           )
@@ -314,7 +337,7 @@ class ReceiptVoucher extends Component {
                 </div>
                 <div className="acc-page-body container-fluid">
                   <div className="av-detail-zone">
-                    {voucher.credit.map((item, index) => {
+                    {voucher.child.map((item, index) => {
                       return (
                         <div className="av-detail-head" key={index}>
                           <div className="main-head" >
@@ -324,18 +347,17 @@ class ReceiptVoucher extends Component {
                                   value={item.tr_type}
                                   maxLength="2"
                                   className="form-control trans-input tr-type form-control-sm"
-                                  onChange={event => this.changeHandler(event, `left_ldr_type`, null, index)}
-                                  onBlur={event => this.blurHandler(event, `left_ldr_type`, null, index)}
+                                  onChange={event => this.changeHandler(event, `ldr_type`, null, index)}
+                                  onBlur={event => this.blurHandler(event, `ldr_type`, null, index)}
                                 />
                               </span>
                               <input type="text"
                                 value={item.ledger_name}
+                                data-type={item.tr_type}
                                 className="form-control trans-input tr-name form-control-sm"
-                                onChange={event => this.changeHandler(event, `credit`, null, index)}
-                                onFocus={event => this.ledgerListHandler(event, `credit`, null, index)}
-                                onBlur={event => this.afterSelectLedgerHandler(event, `credit`, null, index)}
-
-                              // onClick={() => this.effectedLedgerHandler([10])}
+                                onChange={event => this.changeHandler(event, `ldr_name`, null, index)}
+                                onFocus={event => this.ledgerListHandler(event, `ldr_name`, null, index)}
+                                onBlur={event => this.blurHandler(event, `ldr_name`, null, index)}
                               />
                             </div>
                             <div className="head-amount">
@@ -344,9 +366,8 @@ class ReceiptVoucher extends Component {
                                   <input type="text"
                                     value={item.tr_amount}
                                     className="form-control trans-input tr-amount form-control-sm"
-                                    onChange={event => this.changeHandler(event, `credit_amo`, null, index)}
-                                    // onFocus={event => this.ledgerListHandler(event, `credit_amo`, null, index)}
-                                    onBlur={event => this.afterSelectLedgerHandler(event, `credit_amo`, null, index)}
+                                    onChange={event => this.changeHandler(event, `ldr_amo`, null, index, `CR`)}
+                                    onBlur={event => this.blurHandler(event, `ldr_amo`, null, index)}
                                   />
                                   : null}
                               </div>
@@ -355,9 +376,7 @@ class ReceiptVoucher extends Component {
                                   <input type="text"
                                     value={item.tr_amount}
                                     className="form-control trans-input tr-amount form-control-sm"
-                                    onChange={event => this.changeHandler(event, `credit_amo`, null, index)}
-                                    onFocus={event => this.ledgerListHandler(event, `credit_amo`, null, index)}
-                                    onBlur={event => this.afterSelectLedgerHandler(event, `credit_amo`, null, index)}
+                                    onChange={event => this.changeHandler(event, `ldr_amo`, null, index, `DR`)}
                                   />
                                   : null}
                               </div>
@@ -369,74 +388,6 @@ class ReceiptVoucher extends Component {
                         </div>
                       )
                     })}
-                    {voucher.debit.map((item, index) => {
-                      return (
-                        <div className="av-detail-head" key={index}>
-                          <div className="main-head" >
-                            <div className="head-name d-flex">
-                              <span className="txt-normal mr-2">
-                                <input type="text"
-                                  value={item.tr_type}
-                                  maxLength="2"
-                                  className="form-control trans-input tr-type form-control-sm"
-                                  onChange={event => this.changeHandler(event, `right_ldr_type`, null, index)}
-                                  onBlur={event => this.blurHandler(event, `right_ldr_type`, null, index)}
-                                />
-                              </span>
-                              <input type="text"
-                                value={item.ledger_name}
-                                className="form-control trans-input tr-name form-control-sm"
-                                onChange={event => this.changeHandler(event, `debit`, null, index)}
-                                onFocus={event => this.ledgerListHandler(event, `debit`, null, index)}
-                                onBlur={event => this.afterSelectLedgerHandler(event, `debit`, null, index)}
-                              // onClick={() => this.effectedLedgerHandler([10])}
-                              />
-                            </div>
-                            <div className="head-amount">
-                              <div className="dr-total">
-                                {(item.tr_type == "CR") ?
-                                  <input type="text"
-                                    value={item.tr_amount}
-                                    className="form-control trans-input tr-amount form-control-sm"
-                                    onChange={event => this.changeHandler(event, `debit_amo`, null, index)}
-                                    onFocus={event => this.ledgerListHandler(event, `debit_amo`, null, index)}
-                                    onBlur={event => this.afterSelectLedgerHandler(event, `debit_amo`, null, index)}
-                                  />
-                                  : null}
-                              </div>
-                              <div className="cr-total">
-                                {(item.tr_type == "DR") ?
-                                  <input type="text"
-                                    value={item.tr_amount}
-                                    className="form-control trans-input tr-amount form-control-sm"
-                                    onChange={event => this.changeHandler(event, `debit_amo`, null, index)}
-                                    onFocus={event => this.ledgerListHandler(event, `debit_amo`, null, index)}
-                                    onBlur={event => this.afterSelectLedgerHandler(event, `debit_amo`, null, index)}
-                                  />
-                                  : null}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="crnt-balance-head">
-                            <div className="bal-head"><span className="txt-normal">Cur Bal :</span> {item.ldr_ref_id}</div>
-                          </div>
-                        </div>
-                      )
-                    })}
-
-
-                    {/* <div className="av-detail-head">
-                      <div className="main-head">
-                        <div className="head-name"><span className="txt-normal">Dr </span> Fees</div>
-                        <div className="head-amount">
-                          <div className="dr-total"></div>
-                          <div className="cr-total">500.00</div>
-                        </div>
-                      </div>
-                      <div className="crnt-balance-head">
-                        <div className="bal-head"><span className="txt-normal">Cur Bal :</span> 10,000 Dr</div>
-                      </div>
-                    </div> */}
                   </div>
 
                 </div>
@@ -452,8 +403,8 @@ class ReceiptVoucher extends Component {
                       </textarea>
                     </div>
                     <div className="amount-zone">
-                      <div className="dr-total">{voucher.total_amo}</div>
-                      <div className="cr-total">{voucher.total_amo}</div>
+                      <div className="dr-total">{voucher.dr_total_amo}</div>
+                      <div className="cr-total">{voucher.cr_total_amo}</div>
                     </div>
                   </div>
                 </div>
