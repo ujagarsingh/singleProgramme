@@ -1,70 +1,242 @@
-<!DOCTYPE html>
-<html>
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<style>
-  input:focus,
-  li.selected {background:yellow}
-</style>
-</head>
-<body>
-  
-<div class="abc">
-  <input type="text" tabindex="1" maxlength="2""/>
-  <input type="text" tabindex="2" maxlength="2""/>
-  <input type="text" tabindex="3" maxlength="2""/>
-  <input type="text" tabindex="4" maxlength="2""/>
-  <input type="text" tabindex="5" maxlength="2""/>
-</div>
-<input type="text" tabindex="1" maxlength="2""/>
- 
-<script type="text/javascript">
- 
-const allinput = Array.prototype.slice.call(document.querySelector('.abc').querySelectorAll("input"));
-// console.log(allinput);
- 
-function tabHandler(ev){
-  ev.preventDefault();
-  const _ti = ev.target.tabIndex;
-  let nextTi = '';
-  if ((ev.shiftKey && ev.key === 'Tab') || (ev.shiftKey && ev.key === 'Enter') ) {
-      nextTi = (_ti === 1) ? allinput.length : (_ti === allinput.length) ? allinput.length - 1 : _ti - 1 ;
-    } else {
-      nextTi = (_ti === allinput.length) ? 1 : _ti+1 ;
+import React from 'react';
+
+class About extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      cursor : 0,
+      data: [
+                {userId: 1, id: 1, title: "quidem molestiae enim", }, 
+                {userId: 1, id: 2, title: "sunt qui excepturi placeat culpa", }, 
+                {userId: 1, id: 3, title: "omnis laborum odio", }, 
+                {userId: 1, id: 4, title: "non esse culpa molestiae omnis sed optio", }, 
+                {userId: 1, id: 5, title: "eaque aut omnis a", }, 
+                {userId: 1, id: 6, title: "natus impedit quibusdam illo est", }, 
+                {userId: 1, id: 7, title: "quibusdam autem aliquid et et quia", }, 
+                {userId: 1, id: 8, title: "qui fuga est a eum", }, 
+                {userId: 1, id: 9, title: "saepe unde necessitatibus rem", }, 
+                {userId: 1, id: 10, title: "distinctio laborum qui", },      
+                {userId: 1, id: 11, title: "quidem molestiae enim", }, 
+                {userId: 1, id: 12, title: "sunt qui excepturi placeat culpa", }, 
+                {userId: 1, id: 13, title: "omnis laborum odio", }, 
+                {userId: 1, id: 14, title: "non esse culpa molestiae omnis sed optio", }, 
+                {userId: 1, id: 15, title: "eaque aut omnis a", }, 
+                {userId: 1, id: 16, title: "natus impedit quibusdam illo est", }, 
+                {userId: 1, id: 17, title: "quibusdam autem aliquid et et quia", }, 
+                {userId: 1, id: 18, title: "qui fuga est a eum", }, 
+                {userId: 1, id: 19, title: "saepe unde necessitatibus rem", }, 
+                {userId: 1, id: 10, title: "distinctio laborum qui", },      
+                {userId: 1, id: 21, title: "quidem molestiae enim", }, 
+                {userId: 1, id: 22, title: "sunt qui excepturi placeat culpa", }, 
+                {userId: 1, id: 23, title: "omnis laborum odio", }, 
+                {userId: 1, id: 24, title: "non esse culpa molestiae omnis sed optio", }, 
+                {userId: 1, id: 25, title: "eaque aut omnis a", }, 
+                {userId: 1, id: 26, title: "natus impedit quibusdam illo est", }, 
+                {userId: 1, id: 27, title: "quibusdam autem aliquid et et quia", }, 
+                {userId: 1, id: 28, title: "qui fuga est a eum", }, 
+                {userId: 1, id: 29, title: "saepe unde necessitatibus rem", }, 
+                {userId: 1, id: 20, title: "distinctio laborum qui", },      
+                {userId: 1, id: 31, title: "quidem molestiae enim", }, 
+                {userId: 1, id: 32, title: "sunt qui excepturi placeat culpa", }, 
+                {userId: 1, id: 33, title: "omnis laborum odio", }, 
+                {userId: 1, id: 34, title: "non esse culpa molestiae omnis sed optio", }, 
+                {userId: 1, id: 35, title: "eaque aut omnis a", }, 
+                {userId: 1, id: 36, title: "natus impedit quibusdam illo est", }, 
+                {userId: 1, id: 37, title: "quibusdam autem aliquid et et quia", }, 
+                {userId: 1, id: 38, title: "qui fuga est a eum", }, 
+                {userId: 1, id: 39, title: "saepe unde necessitatibus rem", }, 
+                {userId: 1, id: 30, title: "distinctio laborum qui", },      
+                {userId: 1, id: 41, title: "quidem molestiae enim", }, 
+                {userId: 1, id: 42, title: "sunt qui excepturi placeat culpa", }, 
+                {userId: 1, id: 43, title: "omnis laborum odio", }, 
+                {userId: 1, id: 44, title: "non esse culpa molestiae omnis sed optio", }, 
+                {userId: 1, id: 45, title: "eaque aut omnis a", }, 
+                {userId: 1, id: 46, title: "natus impedit quibusdam illo est", }, 
+                {userId: 1, id: 47, title: "quibusdam autem aliquid et et quia", }, 
+                {userId: 1, id: 48, title: "qui fuga est a eum", }, 
+                {userId: 1, id: 49, title: "saepe unde necessitatibus rem", }, 
+                {userId: 1, id: 40, title: "distinctio laborum qui", },      
+                {userId: 1, id: 51, title: "quidem molestiae enim", }, 
+                {userId: 1, id: 52, title: "sunt qui excepturi placeat culpa", }, 
+                {userId: 1, id: 53, title: "omnis laborum odio", }, 
+                {userId: 1, id: 54, title: "non esse culpa molestiae omnis sed optio", }, 
+                {userId: 1, id: 55, title: "eaque aut omnis a", }, 
+                {userId: 1, id: 56, title: "natus impedit quibusdam illo est", }, 
+                {userId: 1, id: 57, title: "quibusdam autem aliquid et et quia", }, 
+                {userId: 1, id: 58, title: "qui fuga est a eum", }, 
+                {userId: 1, id: 59, title: "saepe unde necessitatibus rem", }, 
+                {userId: 1, id: 50, title: "distinctio laborum qui", },      
+                {userId: 1, id: 61, title: "quidem molestiae enim", }, 
+                {userId: 1, id: 62, title: "sunt qui excepturi placeat culpa", }, 
+                {userId: 1, id: 63, title: "omnis laborum odio", }, 
+                {userId: 1, id: 64, title: "non esse culpa molestiae omnis sed optio", }, 
+                {userId: 1, id: 65, title: "eaque aut omnis a", }, 
+                {userId: 1, id: 66, title: "natus impedit quibusdam illo est", }, 
+                {userId: 1, id: 67, title: "quibusdam autem aliquid et et quia", }, 
+                {userId: 1, id: 68, title: "qui fuga est a eum", }, 
+                {userId: 1, id: 69, title: "saepe unde necessitatibus rem", }, 
+                {userId: 1, id: 60, title: "distinctio laborum qui", },      
+        ],
+      filter_data : [],
+      current_ldr : ''
+    }
   }
-  
-  const _input = `input[tabIndex='`+(nextTi)+`']`;
-  document.querySelector(_input).focus();
-
-}
-
-function tabHandler1(ev){
-  ev.preventDefault();
-  const _ti = ev.target;
-  let _ci = '';
-  allinput.map((item, inx)=>{ if(item === _ti){_ci = inx;}});
-  
-  let nextTi = '';
-  if ((ev.shiftKey && ev.key === 'Tab') || (ev.shiftKey && ev.key === 'Enter') ) {
-      nextTi = (_ci === 0) ? allinput.length - 1  : _ci - 1;
-    } else {
-      nextTi = (_ci === allinput.length) ? 0 : (_ci === (allinput.length - 1)) ? 0 : _ci + 1 ;
+  componentDidMount(){
+      let filter_data = [];
+      Object.assign(filter_data, this.state.data);
+      // console.log(filter_data);
+      this.setArraowKeysHandler();
+      this.setState({
+          filter_data : filter_data
+      })
   }
-  (allinput[nextTi]).focus();
-}
+  filterDataHandler=(e)=>{
+      // debugger
+    const val = e.target.value.toUpperCase();
+    const { data } = this.state
+    const filtered_data = data.filter((elem) => {
+        const _elem = elem.title.toUpperCase();
+        if(!_elem.includes(val)){
+            return false
+        }
+        return elem
+    })
+    // console.log(filtered_data);
+    this.setState({
+        filter_data : filtered_data
+    },()=>{
+        // this.handleKeyDown(e)
+    })
+  }
+  setArraowKeysHandler(){
+      document.addEventListener('keydown', (e) => {
+        switch (e.keyCode) {
+        case 37:
+                // console.log('left');
+                this.handleKeyDown("left");
+            break;
+            case 38:
+                // console.log('up');
+                this.handleKeyDown("up");
+                break;
+            case 39:
+                // console.log('right');
+                this.handleKeyDown("right");
+            break;
+        case 40:
+                // console.log('down');
+                this.handleKeyDown("down");
+            break;
+        }
+    });
+  }
+    handleKeyDown = (key) => {
+    const { cursor, filter_data } = this.state
+    // arrow up/down button should select next/previous list element
+    if ((key === "up" || key === "left") && cursor > 0) {
+      this.setState( prevState => ({
+        cursor: prevState.cursor - 1
+      }), ()=>{
+        this.srollListItemHandler(key)
+      })
+    } else if ((key === "down" || key === "right") && cursor < filter_data.length - 1) {
+      this.setState( prevState => ({
+        cursor: prevState.cursor + 1
+      }), ()=>{
+        this.srollListItemHandler(key)
+      })
+    }
+  }
+   srollListItemHandler(key) {
+    // debugger;
+    const _div = document.querySelector('#ldrList');
+    const _fli = _div.querySelector('ul > li');
+    const _elem = _div.querySelector('.active');
 
-document.addEventListener('keydown', (e) => {
-  switch (e.keyCode) {
-          case 13:
-              // console.log('Enter');
-              this.tabHandler(e);
-          case 9:
-              // console.log('Tab');
-              this.tabHandler(e);
-          break;
-      }
-  });
-  
-</script>
-</body>
-</html>
+    let _el = null ;
+     if (key === "up" || key === "left") {
+      _el = (_fli == _elem) ? _elem : _elem.nextElementSibling;
+    } else if (key === "down" || key === "right") {
+      _el = (_fli == _elem) ? _elem : _elem.previousElementSibling;
+    }
+    const _elh = _el.clientHeight;
+
+    let rect = _el.getBoundingClientRect();
+    let elementTop; //x and y
+    var scrollTop = document.documentElement.scrollTop ?
+    document.documentElement.scrollTop : document.body.scrollTop;
+    elementTop = rect.top + scrollTop;
+    console.log(elementTop)
+    
+    if ((key === "up" || key === "left") && elementTop < 1) {
+      _div.scrollBy(0, -_elh);
+    } else if ((key === "down" || key === "right")  && elementTop > 460){
+      _div.scrollBy(0, _elh);
+    }
+  }
+  confirmBoxSubmit = (event) => {
+    event.preventDefault();
+    // debugger
+    const {filter_data, cursor} = this.state;
+    const current_ldr = filter_data[cursor];
+    // console.log(current_ldr);
+    this.setState({
+        current_ldr : current_ldr
+    })
+  }
+
+  render() {
+    const {filter_data, cursor, current_ldr} = this.state;
+    // console.log(this.state)
+    return ( 
+      <div>
+          {/* <h5>Search</h5> */}
+            {filter_data &&
+          <form onSubmit={event => this.confirmBoxSubmit(event)}>
+              
+          {/* <input type="text"
+            defaultValue={current_ldr.title}
+            value={current_ldr.title}
+            onChange={(event)=>{this.filterDataHandler(event)}} />
+            <input type="text" value={current_ldr.id} />
+            <input type="text" value={current_ldr.userId} />
+            <hr/> */}
+            {/* <div className="list-accunts" >
+
+            {filter_data.map((elem, inx)=>{
+              return (
+                <div key={inx}
+                // key={ item._id }
+                tabIndex = "0"
+                className={cursor === inx ? 'active' : null}>
+                    {elem.title}
+                    </div>
+                )
+              })}
+            </div> */}
+              <div className="list-accunts">
+                <div className="list-acc-head">Theme Color Name</div>
+                <div className="list-acc-body" id="ldrList">
+                  <ul>
+                    {filter_data.map((item, index) => {
+                      return (
+                        <li
+                          className={cursor === index ? 'active' : null}
+                          key={index}>
+                          [ {index} ] {item.title}
+                        </li>
+                      )
+                    })}
+                  </ul>
+                </div>
+                <div className="list-acc-footer">more...</div>
+              </div>
+            <button type="submit">submit</button>
+            </form>
+            }
+        </div>
+    );
+  }
+}
+ 
+export default About;
