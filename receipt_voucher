@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import { withRouter } from 'react-router';
 import { Helmet } from "react-helmet";
-// import { NavLink } from 'react-router-dom';
+import { confirmAlert } from 'react-confirm-alert';
 import { connect } from 'react-redux';
+import DatePicker from 'react-date-picker';
 import {
   accLedgerActions, professionalAction,
   accGroupActions, accLedgerEntryActions, studentsAction
 } from '../_actions';
 import { isEmptyObj, isEmpty, checkEntryType, getAllInputs } from '../utility/utilities';
-import { events } from '../_reducers/events.reducer';
+// import { events } from '../_reducers/events.reducer';
 
 // import CommonFilters from '../utility/Filter/filter-schools';
 
@@ -61,17 +62,27 @@ class ReceiptVoucher extends Component {
           this.tabAndEnterHandler(e);
           break;
         default:
-          console.log('something wrong');
+        // console.log('something wrong');
       }
     });
+    this.focusFirstHandler()
   }
-
+  focusFirstHandler() {
+    const allinput = Array.prototype.slice.call(document.querySelector('.sfpage-body').querySelectorAll("textarea, input"));
+    if (allinput.length > 0) {
+      (allinput[0]).focus();
+    }
+  }
+  examStartDate = (feeDate) => {
+    this.setState({ vchr_date: feeDate });
+    // this.to.openCalendar();
+  };
   chooseLedgerHandler() {
     // debugger
 
     const { filter_data, cursor, current_inx } = this.state;
     const current_ldr = filter_data[cursor];
-    console.log(current_ldr);
+    // console.log(current_ldr);
     if (!isEmptyObj(current_ldr)) {
       let sv = this.state.voucher;
       sv.child[current_inx]['ldr_ref_id'] = current_ldr['ldr_ref_id'];
@@ -90,18 +101,43 @@ class ReceiptVoucher extends Component {
     if ((key === "up" || key === "left") && cursor > 0) {
       this.setState(prevState => ({
         cursor: prevState.cursor - 1
-      }))
+      }), () => { this.srollListItemHandler(key) })
     } else if ((key === "down" || key === "right") && cursor < filter_data.length - 1) {
       this.setState(prevState => ({
         cursor: prevState.cursor + 1
-      }))
+      }), () => { this.srollListItemHandler(key) })
     }
   }
 
+  srollListItemHandler(key) {
+    debugger;
+    const _div = document.querySelector('#ldrList');
+    const _ul = _div.querySelector('ul');
+    const _elem = _div.querySelector('.active');
+    const _elh = _elem.clientHeight;
 
+    // var element = document.getElementById('elementId'); //replace elementId with your element's Id.
+    var rect = _elem.getBoundingClientRect();
+    var elementTop; //x and y
+    var scrollTop = document.documentElement.scrollTop ?
+      document.documentElement.scrollTop : document.body.scrollTop;
+    // var scrollLeft = document.documentElement.scrollLeft?                   
+    //                  document.documentElement.scrollLeft:document.body.scrollLeft;
+    elementTop = rect.top + scrollTop;
+    // elementLeft = rect.left+scrollLeft;
+
+    console.log(elementTop)
+    // console.log(elementLeft)
+
+    if (key === "up" || key === "left") {
+      _ul.scrollBy(0, -_elh);
+    } else if (key === "down" || key === "right") {
+      _ul.scrollBy(0, _elh);
+    }
+  }
 
   changeHandler = (event, fieldName, isCheckbox, indexNo, trType) => {
-    debugger
+    // debugger
     if (fieldName === 'ldr_type') {
       // debugger;
       const _val = checkEntryType(event);
@@ -252,35 +288,50 @@ class ReceiptVoucher extends Component {
 
     let nextTi = '';
     if ((ev.shiftKey && ev.key === 'Tab') || (ev.shiftKey && ev.key === 'Enter')) {
-      nextTi = (_ci === 0) ? allinput.length - 1 : _ci - 1;
+      // nextTi = (_ci === 0) ? allinput.length - 1 : _ci - 1;
+      nextTi = (_ci === 0 || _ci === 1) ? 1 : _ci - 1;
     } else {
-      nextTi = (_ci === allinput.length) ? 0 : (_ci === (allinput.length - 1)) ? 0 : _ci + 1;
+      // nextTi = (_ci === allinput.length) ? 0 : (_ci === (allinput.length - 1)) ? 0 : _ci + 1;
+      nextTi = (_ci === allinput.length) ? allinput.length : _ci + 1;
     }
     if (nextTi === (allinput.length - 1)) {
-      console.log("last");
-      this.checkEntriesHandler(ev);
+      const gTotal = this.getSumOfBalanceHandler();
+      // console.log("last transaction");
+      if (gTotal.total_cr !== gTotal.total_dr) {
+        this.checkEntriesHandler(ev, gTotal);
+      } else {
+        (allinput[nextTi]).focus();
+      }
     } else if (nextTi === 1) {
-      console.log("first")
+      // console.log("first")
+      (allinput[nextTi]).focus();
+    } else if (nextTi === allinput.length) {
+      // console.log("last")
+      this.confirmBoxSubmit(ev)
     } else {
       (allinput[nextTi]).focus();
     }
   }
-
-  checkEntriesHandler(ev) {
+  getSumOfBalanceHandler() {
+    debugger
     let sv = JSON.parse(JSON.stringify(this.state.voucher));
-    debugger;
     let total_cr = 0;
     let total_dr = 0;
-    sv.child.forEach(elem =>{
-      if((elem.tr_type).toUpperCase() === "CR"){
+    sv.child.forEach(elem => {
+      if ((elem.tr_type).toUpperCase() === "CR") {
         total_cr += Number(elem.tr_amount);
       } else {
         total_dr += Number(elem.tr_amount);
       }
     });
-    sv['cr_total_amo'] = total_cr;
-    sv['dr_total_amo'] = total_dr;
-    sv.child.push({ ldr_ref_id: "", tr_amount: Math.abs(total_cr - total_dr), tr_type: (total_cr < total_dr) ? "CR" : "DR", ledger_name: "" })
+    return { total_cr: total_cr, total_dr: total_dr };
+  }
+  checkEntriesHandler(ev, gTotal) {
+    const gt = gTotal;
+    let sv = JSON.parse(JSON.stringify(this.state.voucher));
+    sv['cr_total_amo'] = gt.total_cr;
+    sv['dr_total_amo'] = gt.total_dr;
+    sv.child.push({ ldr_ref_id: "", tr_amount: Math.abs(gt.total_cr - gt.total_dr), tr_type: (gt.total_cr < gt.total_dr) ? "CR" : "DR", ledger_name: "" })
     this.setState({
       voucher: sv
     }, () => this.tabAndEnterHandler(ev))
@@ -291,10 +342,36 @@ class ReceiptVoucher extends Component {
     this.setArraowKeysHandler();
   }
 
+
+  confirmBoxSubmit = (event) => {
+    event.preventDefault();
+    confirmAlert({
+      title: 'stay one moment!',
+      message: 'Are you sure do you want to Update these.',
+      buttons: [
+        {
+          label: 'Yes',
+          onClick: () => {
+            this.createHandler();
+          }
+        },
+        {
+          label: 'No',
+          onClick: () => {
+            this.focusFirstHandler();
+          }
+        }
+      ]
+    });
+  };
+  createHandler = () => {
+    alert(JSON.stringify(this.state.voucher));
+  }
+
   render() {
     const { user, accountManager } = this.props;
-    const { voucher, filter_data, cursor } = this.state;
-    console.log(this.state);
+    const { voucher, filter_data, cursor, vchr_date } = this.state;
+    // console.log(this.state);
     return (
       <div className="page-content">
         <Helmet>
@@ -302,6 +379,21 @@ class ReceiptVoucher extends Component {
         </Helmet>
         <div className="page-bar d-flex">
           <div className="page-title"> Receipt Voucher</div>
+          <div className="form-inline ml-auto filter-panel">
+            <span className="filter-closer">
+              <button type="button" className="btn btn-danger filter-toggler-c">
+                <i className="fa fa-times"></i>
+              </button>
+            </span>
+            <div className="filter-con_">
+              <DatePicker
+                onChange={this.examStartDate}
+                value={vchr_date}
+                showLeadingZeroes={true}
+              //minDate={new Date()}
+              />
+            </div>
+          </div>
         </div>
         {user && voucher && accountManager &&
           <div className="card card-box sfpage-cover light-trans">
@@ -310,7 +402,7 @@ class ReceiptVoucher extends Component {
                 {(filter_data.length > 0) &&
                   <div className="list-accunts">
                     <div className="list-acc-head">List of Ledger Accunts</div>
-                    <div className="list-acc-body">
+                    <div className="list-acc-body" id="ldrList">
                       <ul>
                         {filter_data.map((item, index) => {
                           return (
@@ -357,6 +449,7 @@ class ReceiptVoucher extends Component {
                               <span className="txt-normal mr-2">
                                 <input type="text"
                                   value={item.tr_type}
+                                  disabled={(index === 0) ? true : false}
                                   maxLength="2"
                                   className="form-control trans-input tr-type form-control-sm"
                                   onChange={event => this.changeHandler(event, `ldr_type`, null, index)}
