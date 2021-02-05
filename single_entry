@@ -1,0 +1,225 @@
+import React, { Component } from 'react';
+import { withRouter } from 'react-router';
+
+import { isEmpty } from '../utility/utilities';
+
+class SingleEntry extends Component {
+
+  ledgerListHandler = (event, indexNo) => {
+    // debugger
+    const ldr_list = event.target.getAttribute('data-type');
+    const ldr_val = event.target.value;
+    event.target.select();
+    // console.log(ldr_val);
+    if (ldr_list === "CR") {
+      const _inx = this.props.credit_ledgers.findIndex((item) => item.ledger_name === ldr_val);
+      const obj = {
+        filter_data: this.props.credit_ledgers,
+        current_inx: indexNo,
+        cursor: (_inx === -1) ? 0 : _inx,
+      }
+      // console.log(obj);
+
+      this.props.ledgerListHandler(obj);
+    } else if (ldr_list === "DR") {
+      const _inx = this.props.debit_ledgers.findIndex((item) => item.ledger_name === ldr_val);
+      const obj = {
+        filter_data: this.props.debit_ledgers,
+        current_inx: indexNo,
+        cursor: (_inx === -1) ? 0 : _inx,
+      }
+      // console.log(obj);
+
+      this.props.ledgerListHandler(obj);
+    }
+  };
+
+  blurHandler = (event, fieldName, isCheckbox, indexNo, inputType) => {
+    const _val = event.target.value;
+    if (fieldName === 'ldr_type') {
+      const V1 = _val.toUpperCase();
+      if (V1 === "C" || V1 === "D") {
+        const V2 = (V1 === "C") ? "CR" : "DR";
+        this.props.valueTOchangeHandler(V2, indexNo)
+      }
+
+    } else if (fieldName === 'ldr_name') {
+      debugger;
+      if (isEmpty(_val)) {
+        // event.target.focus();
+      } else {
+        // this.props.setFilteredDataHandler();
+      }
+    } else if (fieldName === 'ldr_amo') {
+
+      if (isEmpty(_val)) {
+        // event.target.focus();
+      } else {
+        // this.calculateANDautofillAmountHandler(event, fieldName, isCheckbox, indexNo, inputType);
+      }
+    }
+  };
+
+
+  selectRefTypeHandler() {
+    // debugger;
+    const refs_items = this.props.refs_type;
+    const cursor = this.props.cursor;
+    if (refs_items.length > 0) {
+      return (<div className="list-accunts">
+        <div className="list-acc-head">Adjestment Type</div>
+        <div className="list-acc-body" id="ldrList">
+          <ul>
+            {refs_items.map((item, index) => {
+              return (
+                <li
+                  className={cursor === index ? 'active' : null}
+                  key={index}>
+                  {item.item}
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+      </div>
+      )
+    }
+  }
+  selectLedgerwiseExistingRefsHandler(id){
+    alert("Line No. 89  " + id)
+  }
+
+  getRefTypeHandler = (event, eIndex, rIndex) => {
+    event.preventDefault();
+    this.props.getRefTypeHandler(eIndex, rIndex);
+  }
+  render() {
+    const { eIndex, eItem, lockInputs, refs_type_flag, refs_flag } = this.props;
+    console.log(this.props.cursor)
+    return (
+      <div className="av-detail-head">
+        <div className="main-head" >
+          <div className="head-name d-flex">
+            <span className="txt-normal mr-2">
+              <input type="text"
+                value={eItem.tr_type}
+                disabled={((eIndex === 0) || lockInputs) ? true : false}
+                data-index={eIndex}
+                maxLength="2"
+                className="form-control trans-input tr-type form-control-sm"
+                onChange={event => this.props.changeHandler(event, `ldr_type`, null, eIndex)}
+                onBlur={event => this.blurHandler(event, `ldr_type`, null, eIndex)}
+              />
+            </span>
+            <input type="text"
+              value={eItem.ledger_name}
+              data-type={eItem.tr_type}
+              data-name="ldr_name"
+              disabled={(lockInputs) ? true : false}
+              className="form-control trans-input tr-name form-control-sm"
+              onChange={event => this.props.changeHandler(event, `ldr_name`, null, eIndex)}
+              onFocus={event => this.ledgerListHandler(event, eIndex)}
+              onClick={event => this.ledgerListHandler(event, eIndex)}
+            //onBlur={event => this.blurHandler(event, `ldr_name`, null, eIndex)}
+            />
+          </div>
+          <div className="head-amount">
+            <div className="dr-total">
+              {(eItem.tr_type == "CR") ?
+                <input type="number"
+                  value={eItem.tr_amount}
+                  data-method={eItem.adjustment}
+                  data-ccenter={eItem.cost_center}
+                  disabled={(lockInputs) ? true : false}
+                  className="form-control trans-input tr-amount form-control-sm"
+                  onChange={event => this.props.changeHandler(event, `ldr_amo`, null, eIndex, `CR`)}
+                // onBlur={event => this.blurHandler(event, `ldr_amo`, null, eIndex, `CR`)}
+                />
+                : null}
+            </div>
+            <div className="cr-total">
+              {(eItem.tr_type == "DR") ?
+                <input type="number"
+                  value={eItem.tr_amount}
+                  disabled={(lockInputs) ? true : false}
+                  className="form-control trans-input tr-amount form-control-sm"
+                  onChange={event => this.props.changeHandler(event, `ldr_amo`, null, eIndex, `DR`)}
+                // onBlur={event => this.blurHandler(event, `ldr_amo`, null, eIndex, `DR`)}
+                />
+                : null}
+            </div>
+          </div>
+        </div>
+        <div className="crnt-balance-head">
+          <div className="bal-head"><span className="txt-normal">Cur Bal :</span> {eItem.ldr_ref_id}</div>
+        </div>
+        {eItem.adjustment &&
+          <div className="adjestment-head">
+            {eItem.ref_child.map((rItemm, rIndex) => {
+              return (
+
+                <div className="adjt-head" key={rIndex}>
+                  <div className="ref-type">
+                    <input
+                      // onFocus={event => this.ledgerListHandler(event, eIndex)}
+                      readOnly={true}
+                      defaultValue={rItemm.ref_type}
+                      placeholder={"Refs Type"}
+                      onFocus={event => this.getRefTypeHandler(event, eIndex, rIndex)}
+                      // onChange={event => this.props.changeHandler(event, `ref_type`, null, eIndex, null, rIndex)}
+                      type="text"
+                      className="form-control trans-input tr-amount form-control-sm" />
+                    {refs_type_flag &&
+                      <div className="">
+                        {this.selectRefTypeHandler()}
+                      </div>
+                    }
+                  </div>
+                  <div className="ref-no">
+                    <input type="text"
+                      placeholder={"Refs No"}
+                      className="form-control trans-input tr-amount form-control-sm" />
+                      {refs_flag.adj_ref_flag &&
+                        <div className="">
+                          {this.selectLedgerwiseExistingRefsHandler(eItem.ldr_ref_id)}
+                        </div>
+                      }
+                      </div>
+                  <div className="tr-amount">
+                    <input type="number"
+                      placeholder={"Amount"}
+                      className="form-control trans-input tr-amount form-control-sm" /></div>
+                  <div className="tr-type">                 
+                    <input type="text"
+                      value={eItem.ref_tr_type}
+                      data-index={eIndex}
+                      data-ref-index={rIndex}
+                      placeholder={"Cr/Dr"}
+                      maxLength="2"
+                      className="form-control trans-input tr-type form-control-sm"
+                      onChange={event => this.props.changeHandler(event, `ref_tr_type`, null, eIndex, null, rIndex)}
+                      onBlur={event => this.blurHandler(event, `ref_tr_type`, null, eIndex, null, rIndex)}
+                    />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        }
+        {/* {eItem.cost_center &&
+          <div className="adjestment-head">
+            <div className="adjt-head">
+              <span className="ref-type">Cost Center</span>
+              <span className="ref-no">10</span>
+              <span className="tr-amount">10,000</span>
+              <span className="tr-type">Cr</span>
+            </div>
+          </div>
+        } */}
+      </div>
+
+    )
+  }
+}
+export default withRouter(SingleEntry);
+
