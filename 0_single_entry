@@ -298,4 +298,4 @@ class SingleEntry extends Component {
   }
 }
 export default withRouter(SingleEntry);
-
+ 
