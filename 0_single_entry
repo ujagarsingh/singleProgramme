@@ -85,17 +85,58 @@ class SingleEntry extends Component {
       )
     }
   }
-  selectLedgerwiseExistingRefsHandler(id){
-    alert("Line No. 89  " + id)
+  selectLedgerwiseExistingRefsHandler = () => {
+    // alert("Line No. 89  " + id)
+    // debugger;
+    const { cursor, adj_list } = this.props;
+    // console.log(adj_list);
+    return (
+      <div className="list-accunts">
+        <div className="list-acc-head">Adjestment Type</div>
+        <div className="list-acc-body" id="ldrList">
+          <table className="table table-bordered table-sm m-0">
+            <tbody>
+              {adj_list.map((elem, index) => {
+                return (
+                  <tr
+                    className={cursor === index ? 'active' : null}
+                    key={index}>
+                    <td>{elem.ldr_ref_id}</td>
+                    <td>{elem.id}</td>
+                    <td>{elem.tr_date}</td>
+                    <td>{elem.tr_amount}</td>
+                    <td>{elem.tr_type}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    )
+
+    // id: "87"
+    // ldr_ref_id: "13_STF_4"
+    // ref_type: "1"
+    // school_id: "4"
+    // self_ref_id: "0"
+    // server_date_time: "2021-01-26 18:29:29"
+    // session_year_id: "1"
+    // tr_amount: "13555"
+    // tr_date: "2021-01-27"
+    // tr_type: "CR"
+    // vchr_ref_id: "3352"
+    // return adj_list; 
   }
 
   getRefTypeHandler = (event, eIndex, rIndex) => {
     event.preventDefault();
     this.props.getRefTypeHandler(eIndex, rIndex);
   }
+
   render() {
     const { eIndex, eItem, lockInputs, refs_type_flag, refs_flag } = this.props;
-    console.log(this.props.cursor)
+    // console.log(this.props.cursor)
     return (
       <div className="av-detail-head">
         <div className="main-head" >
@@ -104,7 +145,8 @@ class SingleEntry extends Component {
               <input type="text"
                 value={eItem.tr_type}
                 disabled={((eIndex === 0) || lockInputs) ? true : false}
-                data-index={eIndex}
+                data-eindex={eIndex}
+                data-ename={'ldr_type'}
                 maxLength="2"
                 className="form-control trans-input tr-type form-control-sm"
                 onChange={event => this.props.changeHandler(event, `ldr_type`, null, eIndex)}
@@ -114,7 +156,8 @@ class SingleEntry extends Component {
             <input type="text"
               value={eItem.ledger_name}
               data-type={eItem.tr_type}
-              data-name="ldr_name"
+              data-eindex={eIndex}
+              data-ename={'ldr_name'}
               disabled={(lockInputs) ? true : false}
               className="form-control trans-input tr-name form-control-sm"
               onChange={event => this.props.changeHandler(event, `ldr_name`, null, eIndex)}
@@ -130,6 +173,8 @@ class SingleEntry extends Component {
                   value={eItem.tr_amount}
                   data-method={eItem.adjustment}
                   data-ccenter={eItem.cost_center}
+                  data-eindex={eIndex}
+                  data-ename={'ldr_amo'}
                   disabled={(lockInputs) ? true : false}
                   className="form-control trans-input tr-amount form-control-sm"
                   onChange={event => this.props.changeHandler(event, `ldr_amo`, null, eIndex, `CR`)}
@@ -141,6 +186,8 @@ class SingleEntry extends Component {
               {(eItem.tr_type == "DR") ?
                 <input type="number"
                   value={eItem.tr_amount}
+                  data-eindex={eIndex}
+                  data-ename={'ldr_amo'}
                   disabled={(lockInputs) ? true : false}
                   className="form-control trans-input tr-amount form-control-sm"
                   onChange={event => this.props.changeHandler(event, `ldr_amo`, null, eIndex, `DR`)}
@@ -153,11 +200,10 @@ class SingleEntry extends Component {
         <div className="crnt-balance-head">
           <div className="bal-head"><span className="txt-normal">Cur Bal :</span> {eItem.ldr_ref_id}</div>
         </div>
-        {eItem.adjustment &&
+        {eItem.adjustment && eItem.tr_amount &&
           <div className="adjestment-head">
             {eItem.ref_child.map((rItemm, rIndex) => {
               return (
-
                 <div className="adjt-head" key={rIndex}>
                   <div className="ref-type">
                     <input
@@ -165,6 +211,9 @@ class SingleEntry extends Component {
                       readOnly={true}
                       defaultValue={rItemm.ref_type}
                       placeholder={"Refs Type"}
+                      data-eindex={eIndex}
+                      data-rindex={rIndex}
+                      data-ename={'ref_type'}
                       onFocus={event => this.getRefTypeHandler(event, eIndex, rIndex)}
                       // onChange={event => this.props.changeHandler(event, `ref_type`, null, eIndex, null, rIndex)}
                       type="text"
@@ -175,32 +224,59 @@ class SingleEntry extends Component {
                       </div>
                     }
                   </div>
-                  <div className="ref-no">
-                    <input type="text"
-                      placeholder={"Refs No"}
-                      className="form-control trans-input tr-amount form-control-sm" />
+                  {(rItemm.ref_type === 'New Ref') ?
+                    <div className="ref-no">
+                      <input type="text"
+                        readOnly={true}
+                        placeholder={"Refs No"}
+                        data-eindex={eIndex}
+                        data-rindex={rIndex}
+                        data-ename={'refs_no'}
+                        defaultValue={rItemm.ref_no}
+                        // changeHandler = (event, fieldName, isCheckbox, eIndex, trType, rIndex)
+                        // onChange={event => this.props.changeHandler(event, `refs_no`, null, eIndex, null, rIndex)}
+                        className="form-control trans-input tr-amount form-control-sm" />
+                    </div>
+                    : null}
+                  {(rItemm.ref_type === 'Adjestment') ?
+                    <div className="ref-no">
+                      <input type="text"
+                        readOnly={true}
+                        placeholder={"Refs No"}
+                        data-eindex={eIndex}
+                        data-rindex={rIndex}
+                        data-ename={'refs_no'}
+                        defaultValue={rItemm.ref_no}
+                        onFocus={() => { this.props.activeRefListFlag() }}
+                        className="form-control trans-input tr-amount form-control-sm" />
                       {refs_flag.adj_ref_flag &&
                         <div className="">
-                          {this.selectLedgerwiseExistingRefsHandler(eItem.ldr_ref_id)}
+                          {this.selectLedgerwiseExistingRefsHandler()}
                         </div>
                       }
-                      </div>
+                    </div>
+                    : null}
                   <div className="tr-amount">
                     <input type="number"
                       placeholder={"Amount"}
+                      data-eindex={eIndex}
+                      data-rindex={rIndex}
+                      data-ename={'ref_tr_amo'}
+                      value={rItemm.tr_amount}
+                      onChange={event => this.props.changeHandler(event, `ref_tr_amo`, null, eIndex, eItem.tr_type, rIndex)}
                       className="form-control trans-input tr-amount form-control-sm" /></div>
-                  <div className="tr-type">                 
+                  {/* <div className="tr-type">
                     <input type="text"
                       value={eItem.ref_tr_type}
                       data-index={eIndex}
                       data-ref-index={rIndex}
-                      placeholder={"Cr/Dr"}
+                      //placeholder={"Cr/Dr"}
                       maxLength="2"
                       className="form-control trans-input tr-type form-control-sm"
                       onChange={event => this.props.changeHandler(event, `ref_tr_type`, null, eIndex, null, rIndex)}
                       onBlur={event => this.blurHandler(event, `ref_tr_type`, null, eIndex, null, rIndex)}
                     />
-                  </div>
+                  </div> */}
                 </div>
               )
             })}
