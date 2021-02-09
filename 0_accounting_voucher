@@ -18,7 +18,8 @@ class AccountingVoucher extends Component {
     cursor: 0,
     refs_type_flag: false,
     list_type: 'ledger',
-    vcher_inx: null,
+    eindex: null,
+    rindex: null,
     refs_type: [{ id: 1, item: "New Ref" }, { id: 2, item: "Adjestment" }, { id: 3, item: "Advance" }, { id: 4, item: "On Account" }],
     adj_list: [],
     filter_data: [],
@@ -80,16 +81,19 @@ class AccountingVoucher extends Component {
 
   chooseLedgerHandler() {
     //  debugger
-    const { filter_data, cursor, current_inx } = this.state;
+    const { filter_data, cursor, eindex } = this.state;
     const current_ldr = filter_data[cursor];
-    // console.log(current_ldr);
+
+    console.log(cursor);
+    console.log(eindex);
+    console.log(current_ldr);
     if (!isEmptyObj(current_ldr)) {
       let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
-      _voucher_obj.child[current_inx]['ldr_ref_id'] = current_ldr['ldr_ref_id'];
-      _voucher_obj.child[current_inx]['ledger_name'] = current_ldr['ledger_name'];
-      _voucher_obj.child[current_inx]['adjustment'] = current_ldr['adjustment'];
-      _voucher_obj.child[current_inx]['cost_center'] = current_ldr['cost_center'];
-      _voucher_obj.child[current_inx]['ref_child'] = [{ id: "", ref_type: "", ref_no: "", tr_amount: "", tr_type: "" }];
+      _voucher_obj.child[eindex]['ldr_ref_id'] = current_ldr['ldr_ref_id'];
+      _voucher_obj.child[eindex]['ledger_name'] = current_ldr['ledger_name'];
+      _voucher_obj.child[eindex]['adjustment'] = current_ldr['adjustment'];
+      _voucher_obj.child[eindex]['cost_center'] = current_ldr['cost_center'];
+      _voucher_obj.child[eindex]['ref_child'] = [{ id: "", ref_type: "", ref_no: "", tr_amount: "", tr_type: "" }];
       // alert(1);
       this.setState({
         voucher_obj: _voucher_obj,
@@ -275,48 +279,62 @@ class AccountingVoucher extends Component {
     // debugger;
     this.setState({
       filter_data: obj['filter_data'],
-      current_inx: obj['current_inx'],
+      eindex: obj['eindex'],
+      rindex: obj['rindex'],
       cursor: obj['cursor'],
-      list_type: 'ledger',
+      list_type: obj['list_type'],
       formIsHalfFilledOut: true
     })
   }
 
   tabAndEnterHandler(ev) {
-    debugger;
+    // debugger;
     ev.preventDefault();
-    // const eindex = ev.target.dataset.eindex;
-    if(ev.shiftKey){
-
-    } else{
-
-    
+    const _val = ev.target.value;
     const ename = ev.target.dataset.ename;
-    const { list_type } = this.state;
-    if (ename === "ref_type") {
-      if (list_type === "adjustment") {
-        this.refsTypeHandler(ev);
-      } else if (list_type === "old_refs") {
-        this.getOldRefsDataHandler(ev);
-      }
-    } else if (ename === "ref_tr_amo") {
-      this.getNewRefsVSledgerHandler(ev);
+    if (ev.shiftKey) {
+      // alert("Shift Key Active");
+      const allinput = getAllInputs();
+      const nextTi = accMethod.getNextInputHandler(ev, getAllInputs());
+      const nextInput = allinput[nextTi]
+      accMethod.selectAndFocusNext(nextInput);
     } else {
-      this.ledgerNameAndAmountHandler(ev)
+      // const ename = ev.target.dataset.ename;
+      if ((ename === 'ldr_amo' || ename === 'ref_tr_amo') && isEmpty(_val)) {
+        alert("Insert a valid input first !!!!!")
+      } else {
+        const { list_type } = this.state;
+        if (ename === "ref_type" || ename === "refs_no") {
+          if (list_type === "adjustment") {
+            this.refsTypeHandler(ev);
+          } else if (list_type === "old_refs") {
+            this.getOldRefsDataHandler(ev);
+          } else {
+            const allinput = getAllInputs();
+            const nextTi = accMethod.getNextInputHandler(ev, getAllInputs());
+            const nextInput = allinput[nextTi]
+            accMethod.selectAndFocusNext(nextInput);
+          }
+        } else if (ename === "ref_tr_amo") {
+          this.getNewRefsVSledgerHandler(ev);
+        } else {
+          this.ledgerNameAndAmountHandler(ev)
+        }
+      }
     }
-    }
+
   }
 
   ledgerNameAndAmountHandler(ev) {
     ev.preventDefault();
     const allinput = getAllInputs();
     let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
-    const _ti = ev.target;
-    let input_index = ''; // current row index
-    allinput.forEach((item, inx) => { if (item === _ti) { input_index = inx; } });
-
-    const nextTi = accMethod.getNextInputHandler(ev, input_index, allinput);
-    const nextInput = allinput[nextTi]
+    // const _ti = ev.target;
+    // let input_index = ''; // current input index
+    // allinput.forEach((item, inx) => { if (item === _ti) { input_index = inx; } });
+    const nextTi = accMethod.getNextInputHandler(ev, getAllInputs());
+    const nextInput = allinput[nextTi];
+    // console.log(this.state.cursor);
     if (nextTi !== -1) {
       if (nextTi === (allinput.length - 1)) {
         // console.log("last transaction");
@@ -331,7 +349,7 @@ class AccountingVoucher extends Component {
         accMethod.selectAndFocusNext(nextInput);
       } else if (nextTi === allinput.length) {
         // console.log("for submit")
-        debugger;
+        // debugger;
         if (!isEmpty(_voucher_obj.cr_total_amo) || !isEmpty(_voucher_obj.dr_total_amo)) {
           this.setState({
             lockInputs: true
@@ -341,10 +359,14 @@ class AccountingVoucher extends Component {
           alert('Something is Wrong!')
         }
       } else {
+        console.log("select next")
+        console.log(this.state.cursor);
         accMethod.selectAndFocusNext(nextInput);
       }
     }
     if (ev.target.dataset.ename === 'ldr_name') {
+      console.log("choose ldr")
+      console.log(this.state.cursor);
       this.chooseLedgerHandler();
     }
   }
@@ -572,15 +594,18 @@ class AccountingVoucher extends Component {
 
   ///////////////////////////////////////////////////////
 
-  getRefTypeHandler = (eIndex, rIndex) => {
+  setCredentialsHandler = (event, eIndex, rIndex, list_type) => {
     // debugger;
     // for Active Adjustment List
+    let _cursor = this.state.cursor;
+    const ename = event.target.dataset.ename;
     this.setState({
-      cursor: 0,
-      refs_type_flag: true,
-      list_type: 'adjustment',
-      vcher_inx: eIndex,
-      ref_inx: rIndex,
+      // refs_type_flag: true,
+      // list_type: 'adjustment',
+      cursor: (ename === 'ref_type' || ename === 'refs_no') ? 0 : _cursor,
+      list_type: list_type,
+      eindex: eIndex,
+      rindex: rIndex,
       refs_flag: { new_ref_flag: false, adj_ref_flag: false, adv_ref_flag: false, acc_ref_flag: false },
     })
   }
@@ -588,11 +613,11 @@ class AccountingVoucher extends Component {
   nextInputManager(ev) {
     ev.preventDefault();
     const allinput = getAllInputs();
-    const _ti = ev.target;
-    let input_index = ''; // current row index
-    allinput.forEach((item, inx) => { if (item === _ti) { input_index = inx; } });
+    // const _ti = ev.target;
+    // let input_index = ''; // current row index
+    // allinput.forEach((item, inx) => { if (item === _ti) { input_index = inx; } });
 
-    const nextTi = accMethod.getNextInputHandler(ev, input_index, allinput);
+    const nextTi = accMethod.getNextInputHandler(ev, getAllInputs());
     const nextInput = allinput[nextTi]
     accMethod.selectAndFocusNext(nextInput);
 
@@ -605,17 +630,17 @@ class AccountingVoucher extends Component {
     let adj_ref_flag = false;
     let adv_ref_flag = false;
     let acc_ref_flag = false;
-    const { cursor, refs_type, voucher_obj, current_inx, ref_inx, } = this.state;
+    const { cursor, refs_type, voucher_obj, eindex, rindex, } = this.state;
     const crRef = refs_type[cursor];
     let _voucher_obj = JSON.parse(JSON.stringify(voucher_obj));
-    _voucher_obj.child[current_inx].ref_child[ref_inx]['id'] = crRef.id;
-    _voucher_obj.child[current_inx].ref_child[ref_inx]['ref_type'] = crRef.item;
+    _voucher_obj.child[eindex].ref_child[rindex]['id'] = crRef.id;
+    _voucher_obj.child[eindex].ref_child[rindex]['ref_type'] = crRef.item;
     // elem = { ...elem, id: crRef.id, ref_type: crRef.item }
     if (crRef.id === 1) {       // console.log("New Ref")
       const last = this.props.accountManager.adjustments.length;
       const _ref_no = Number(this.props.accountManager.adjustments[last - 1].id) + 1;
       new_ref_flag = true;
-      _voucher_obj.child[current_inx].ref_child[ref_inx]['ref_no'] = _ref_no;
+      _voucher_obj.child[eindex].ref_child[rindex]['ref_no'] = _ref_no;
     } else if (crRef.id === 2) {      // console.log("Adjustment")
       adj_ref_flag = true;
     } else if (crRef.id === 3) {      // console.log("Advance")
@@ -650,6 +675,13 @@ class AccountingVoucher extends Component {
     if (adjustments.length > 0) {
       adj_list = adjustments.filter(e => e.ldr_ref_id === id)
     }
+    let balance_amo = 0;
+    let balance_type = null;
+    if (adj_list.length > 0) {
+      adj_list = adj_list.forEach((e) => {
+      balance_amo +=  e.ldr_ref_id
+      })
+    }
     this.setState({ adj_list: adj_list })
     // return adj_list;
   }
@@ -657,12 +689,12 @@ class AccountingVoucher extends Component {
   getOldRefsDataHandler = (ev) => {
     debugger
     ev.preventDefault()
-    const { cursor, adj_list, current_inx, ref_inx, voucher_obj } = this.state;
+    const { cursor, adj_list, eindex, rindex, voucher_obj } = this.state;
     const adjData = adj_list[cursor];
     console.log(adjData);
     let _voucher_obj = JSON.parse(JSON.stringify(voucher_obj));
-    _voucher_obj.child[current_inx].ref_child[ref_inx]['ref_no'] = adjData.id;
-    _voucher_obj.child[current_inx].ref_child[ref_inx]['tr_amount'] = adjData.tr_amount;
+    _voucher_obj.child[eindex].ref_child[rindex]['ref_no'] = adjData.id;
+    _voucher_obj.child[eindex].ref_child[rindex]['tr_amount'] = adjData.tr_amount;
 
     this.setState({
       voucher_obj: _voucher_obj,
@@ -709,7 +741,20 @@ class AccountingVoucher extends Component {
   }
 
   addNewRefsHandler = (ev) => {
-    alert(1);
+    debugger
+    const eindex = ev.target.dataset.eindex;
+    // const rindex = ev.target.dataset.rindex;
+    // const ename = ev.target.dataset.ename;
+    const voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+    const new_ref_obj = { id: "", ref_type: "", ref_no: "", tr_amount: "", tr_type: "" };
+    voucher_obj.child[eindex].ref_child.push(new_ref_obj);
+    this.setState({
+      voucher_obj: voucher_obj,
+      // lockInputs: false,
+      // vchr_type: vchr_type,
+      // first_vchr_type: tr_type,
+      // formIsHalfFilledOut: true
+    }, () => { this.nextInputManager(ev) })
   }
 
   getNewRefsVSledgerHandler = (ev) => {
@@ -724,8 +769,10 @@ class AccountingVoucher extends Component {
       this.ledgerNameAndAmountHandler(ev)
     } else if (ldr_amo > ref_amo) {
       this.addNewRefsHandler(ev)
+    } else if (ldr_amo < ref_amo) {
+      alert("Invalid amount")
     } else if (ref_amo === '') {
-      alert("insert a amount")
+      alert("Invalid amount")
     }
   }
 
@@ -735,8 +782,11 @@ class AccountingVoucher extends Component {
   render() {
     const { user, accountManager, accLedgerEntry } = this.props;
     const { voucher_obj, filter_data, vchr_type, refs_type, refs_type_flag, list_type, refs_flag, adj_list,
+      eindex, rindex,
       formIsHalfFilledOut, cursor, vchr_date, lockInputs, credit_ledgers, debit_ledgers } = this.state;
-    // console.log(this.state.voucher_obj);
+    // console.log(this.state.cursor);
+    // console.log(this.state.eindex);
+    // console.log(this.state.rindex);
     return (
       <div className="page-content">
         <Helmet>
@@ -799,7 +849,9 @@ class AccountingVoucher extends Component {
           <div className="card card-box sfpage-cover light-trans">
             <div className="card-body p-1 sfpage-body">
               <div className="acc-page page-receipt-voucher">
-                {this.filteredLedgerListHandler(filter_data, cursor)}
+                {(list_type === "ledger") &&
+                  this.filteredLedgerListHandler(filter_data, cursor)
+                }
                 {this.staticHeader()}
                 <div className="acc-page-body container-fluid">
                   <div className="av-detail-zone">
@@ -810,12 +862,14 @@ class AccountingVoucher extends Component {
                             eIndex={index}
                             lockInputs={lockInputs}
                             cursor={cursor}
+                            eindex={eindex}
+                            rindex={rindex}
                             refs_type_flag={refs_type_flag}
                             adj_list={adj_list}
                             refs_flag={refs_flag}
                             refs_type={refs_type}
                             list_type={list_type}
-                            getRefTypeHandler={this.getRefTypeHandler}
+                            setCredentialsHandler={this.setCredentialsHandler}
                             activeRefListFlag={this.activeRefListFlag}
                             eItem={item}
                             credit_ledgers={credit_ledgers}
