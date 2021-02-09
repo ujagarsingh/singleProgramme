@@ -5,7 +5,7 @@ import { isEmpty } from '../utility/utilities';
 
 class SingleEntry extends Component {
 
-  ledgerListHandler = (event, indexNo) => {
+  ledgerListHandler = (event, eIndex, rIndex, list_type) => {
     // debugger
     const ldr_list = event.target.getAttribute('data-type');
     const ldr_val = event.target.value;
@@ -15,7 +15,9 @@ class SingleEntry extends Component {
       const _inx = this.props.credit_ledgers.findIndex((item) => item.ledger_name === ldr_val);
       const obj = {
         filter_data: this.props.credit_ledgers,
-        current_inx: indexNo,
+        eindex: eIndex,
+        rindex: rIndex,
+        list_type: list_type,
         cursor: (_inx === -1) ? 0 : _inx,
       }
       // console.log(obj);
@@ -25,7 +27,9 @@ class SingleEntry extends Component {
       const _inx = this.props.debit_ledgers.findIndex((item) => item.ledger_name === ldr_val);
       const obj = {
         filter_data: this.props.debit_ledgers,
-        current_inx: indexNo,
+        eindex: eIndex,
+        rindex: rIndex,
+        list_type: list_type,
         cursor: (_inx === -1) ? 0 : _inx,
       }
       // console.log(obj);
@@ -34,13 +38,13 @@ class SingleEntry extends Component {
     }
   };
 
-  blurHandler = (event, fieldName, isCheckbox, indexNo, inputType) => {
+  blurHandler = (event, fieldName, isCheckbox, eIndex, inputType) => {
     const _val = event.target.value;
     if (fieldName === 'ldr_type') {
       const V1 = _val.toUpperCase();
       if (V1 === "C" || V1 === "D") {
         const V2 = (V1 === "C") ? "CR" : "DR";
-        this.props.valueTOchangeHandler(V2, indexNo)
+        this.props.valueTOchangeHandler(V2, eIndex)
       }
 
     } else if (fieldName === 'ldr_name') {
@@ -55,7 +59,7 @@ class SingleEntry extends Component {
       if (isEmpty(_val)) {
         // event.target.focus();
       } else {
-        // this.calculateANDautofillAmountHandler(event, fieldName, isCheckbox, indexNo, inputType);
+        // this.calculateANDautofillAmountHandler(event, fieldName, isCheckbox, eIndex, inputType);
       }
     }
   };
@@ -129,13 +133,13 @@ class SingleEntry extends Component {
     // return adj_list; 
   }
 
-  getRefTypeHandler = (event, eIndex, rIndex) => {
+  setCredentialsHandler = (event, eIndex, rIndex, list_type) => {
     event.preventDefault();
-    this.props.getRefTypeHandler(eIndex, rIndex);
+    this.props.setCredentialsHandler(event, eIndex, rIndex, list_type);
   }
 
   render() {
-    const { eIndex, eItem, lockInputs, refs_type_flag, refs_flag } = this.props;
+    const { eIndex, eItem, lockInputs, list_type, eindex, rindex } = this.props;
     // console.log(this.props.cursor)
     return (
       <div className="av-detail-head">
@@ -151,6 +155,7 @@ class SingleEntry extends Component {
                 className="form-control trans-input tr-type form-control-sm"
                 onChange={event => this.props.changeHandler(event, `ldr_type`, null, eIndex)}
                 onBlur={event => this.blurHandler(event, `ldr_type`, null, eIndex)}
+                onFocus={event => this.setCredentialsHandler(event, eIndex, null, null)}
               />
             </span>
             <input type="text"
@@ -161,8 +166,8 @@ class SingleEntry extends Component {
               disabled={(lockInputs) ? true : false}
               className="form-control trans-input tr-name form-control-sm"
               onChange={event => this.props.changeHandler(event, `ldr_name`, null, eIndex)}
-              onFocus={event => this.ledgerListHandler(event, eIndex)}
-              onClick={event => this.ledgerListHandler(event, eIndex)}
+              onFocus={event => this.ledgerListHandler(event, eIndex, null, "ledger")}
+              // onClick={event => this.ledgerListHandler(event, eIndex, null, "ledger")}
             //onBlur={event => this.blurHandler(event, `ldr_name`, null, eIndex)}
             />
           </div>
@@ -178,7 +183,7 @@ class SingleEntry extends Component {
                   disabled={(lockInputs) ? true : false}
                   className="form-control trans-input tr-amount form-control-sm"
                   onChange={event => this.props.changeHandler(event, `ldr_amo`, null, eIndex, `CR`)}
-                // onBlur={event => this.blurHandler(event, `ldr_amo`, null, eIndex, `CR`)}
+                  onFocus={event => this.setCredentialsHandler(event, eIndex, null, null)}
                 />
                 : null}
             </div>
@@ -191,7 +196,7 @@ class SingleEntry extends Component {
                   disabled={(lockInputs) ? true : false}
                   className="form-control trans-input tr-amount form-control-sm"
                   onChange={event => this.props.changeHandler(event, `ldr_amo`, null, eIndex, `DR`)}
-                // onBlur={event => this.blurHandler(event, `ldr_amo`, null, eIndex, `DR`)}
+                  onFocus={event => this.setCredentialsHandler(event, eIndex, null, null)}
                 />
                 : null}
             </div>
@@ -214,11 +219,11 @@ class SingleEntry extends Component {
                       data-eindex={eIndex}
                       data-rindex={rIndex}
                       data-ename={'ref_type'}
-                      onFocus={event => this.getRefTypeHandler(event, eIndex, rIndex)}
+                      onFocus={event => this.setCredentialsHandler(event, eIndex, rIndex, 'adjustment')}
                       // onChange={event => this.props.changeHandler(event, `ref_type`, null, eIndex, null, rIndex)}
                       type="text"
                       className="form-control trans-input tr-amount form-control-sm" />
-                    {refs_type_flag &&
+                    {(list_type === "adjustment") && (eIndex === eindex) && (rIndex === rindex) &&
                       <div className="">
                         {this.selectRefTypeHandler()}
                       </div>
@@ -247,9 +252,10 @@ class SingleEntry extends Component {
                         data-rindex={rIndex}
                         data-ename={'refs_no'}
                         defaultValue={rItemm.ref_no}
-                        onFocus={() => { this.props.activeRefListFlag() }}
+                        // onFocus={() => { this.props.activeRefListFlag() }}
+                        onFocus={event => this.setCredentialsHandler(event, eIndex, rIndex, 'old_refs')}
                         className="form-control trans-input tr-amount form-control-sm" />
-                      {refs_flag.adj_ref_flag &&
+                      {(list_type === "old_refs") && (eIndex === eindex) && (rIndex === rindex) &&
                         <div className="">
                           {this.selectLedgerwiseExistingRefsHandler()}
                         </div>
@@ -263,6 +269,7 @@ class SingleEntry extends Component {
                       data-rindex={rIndex}
                       data-ename={'ref_tr_amo'}
                       value={rItemm.tr_amount}
+                      onFocus={event => this.setCredentialsHandler(event, eIndex, rIndex, null)}
                       onChange={event => this.props.changeHandler(event, `ref_tr_amo`, null, eIndex, eItem.tr_type, rIndex)}
                       className="form-control trans-input tr-amount form-control-sm" /></div>
                   {/* <div className="tr-type">
@@ -298,4 +305,4 @@ class SingleEntry extends Component {
   }
 }
 export default withRouter(SingleEntry);
- 
+
