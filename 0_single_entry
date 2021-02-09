@@ -202,10 +202,16 @@ class SingleEntry extends Component {
             </div>
           </div>
         </div>
+        {eItem.ledger_name &&  (eIndex === eindex) && 
         <div className="crnt-balance-head">
-          <div className="bal-head"><span className="txt-normal">Cur Bal :</span> {eItem.ldr_ref_id}</div>
+          <div className="bal-head">
+            <span className="txt-normal">Cur Bal :</span> {eItem.ldr_crnt_balance}
+            <span className="txt-normal ml-1">{eItem.ldr_crnt_balance_type}</span> 
+            <span className="txt-normal ml-4">ID :</span> {eItem.ldr_ref_id}
+          </div>
         </div>
-        {eItem.adjustment && eItem.tr_amount &&
+        }
+        {eItem.adjustment && eItem.tr_amount &&  (eIndex === eindex) && 
           <div className="adjestment-head">
             {eItem.ref_child.map((rItemm, rIndex) => {
               return (
@@ -305,4 +311,3 @@ class SingleEntry extends Component {
   }
 }
 export default withRouter(SingleEntry);
-
