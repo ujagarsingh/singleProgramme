@@ -79,20 +79,31 @@ class AccountingVoucher extends Component {
     // this.to.openCalendar();
   };
 
+  getCurrentLDRbalanceAndtypeHandler(ldr_id){
+  const { adjustments } = this.props.accountManager;
+    let adj_list = [];
+    if (adjustments.length > 0) {
+      adj_list = adjustments.filter(e => e.ldr_ref_id === ldr_id)
+    }
+    const res = accMethod.getSumOfBalanceAndTypeHandler(adj_list);
+    // console.log(res);
+    return res;
+  }
+
   chooseLedgerHandler() {
     //  debugger
     const { filter_data, cursor, eindex } = this.state;
     const current_ldr = filter_data[cursor];
-
-    console.log(cursor);
-    console.log(eindex);
-    console.log(current_ldr);
+    const ldrBAT = this.getCurrentLDRbalanceAndtypeHandler(current_ldr['ldr_ref_id']);
+    console.log(ldrBAT);
     if (!isEmptyObj(current_ldr)) {
       let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
       _voucher_obj.child[eindex]['ldr_ref_id'] = current_ldr['ldr_ref_id'];
       _voucher_obj.child[eindex]['ledger_name'] = current_ldr['ledger_name'];
       _voucher_obj.child[eindex]['adjustment'] = current_ldr['adjustment'];
       _voucher_obj.child[eindex]['cost_center'] = current_ldr['cost_center'];
+      _voucher_obj.child[eindex]['ldr_crnt_balance'] = ldrBAT['total_cr'] - ldrBAT['total_dr'];
+      _voucher_obj.child[eindex]['ldr_crnt_balance_type'] = ldrBAT['tr_type'];
       _voucher_obj.child[eindex]['ref_child'] = [{ id: "", ref_type: "", ref_no: "", tr_amount: "", tr_type: "" }];
       // alert(1);
       this.setState({
@@ -259,6 +270,7 @@ class AccountingVoucher extends Component {
     let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
     const _val = e.target.value;
     _voucher_obj.child[eIndex].tr_amount = _val;
+    _voucher_obj.child[eIndex].ldr_crnt_balance = _voucher_obj.child[eIndex].ldr_crnt_balance - _val;
     this.setState({
       list_type: '',
       last_fieldName: fieldName,
@@ -675,13 +687,6 @@ class AccountingVoucher extends Component {
     if (adjustments.length > 0) {
       adj_list = adjustments.filter(e => e.ldr_ref_id === id)
     }
-    let balance_amo = 0;
-    let balance_type = null;
-    if (adj_list.length > 0) {
-      adj_list = adj_list.forEach((e) => {
-      balance_amo +=  e.ldr_ref_id
-      })
-    }
     this.setState({ adj_list: adj_list })
     // return adj_list;
   }
@@ -691,7 +696,7 @@ class AccountingVoucher extends Component {
     ev.preventDefault()
     const { cursor, adj_list, eindex, rindex, voucher_obj } = this.state;
     const adjData = adj_list[cursor];
-    console.log(adjData);
+    // console.log(adjData);
     let _voucher_obj = JSON.parse(JSON.stringify(voucher_obj));
     _voucher_obj.child[eindex].ref_child[rindex]['ref_no'] = adjData.id;
     _voucher_obj.child[eindex].ref_child[rindex]['tr_amount'] = adjData.tr_amount;
@@ -710,7 +715,7 @@ class AccountingVoucher extends Component {
       refs_flag: { new_ref_flag: false, adj_ref_flag: true, adv_ref_flag: false, acc_ref_flag: false },
     })
   }
-
+  
 
   updateRefsTransetionAmountHandler = (event, eIndex, rIndex, trType, fieldName) => {
     let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
@@ -784,9 +789,7 @@ class AccountingVoucher extends Component {
     const { voucher_obj, filter_data, vchr_type, refs_type, refs_type_flag, list_type, refs_flag, adj_list,
       eindex, rindex,
       formIsHalfFilledOut, cursor, vchr_date, lockInputs, credit_ledgers, debit_ledgers } = this.state;
-    // console.log(this.state.cursor);
-    // console.log(this.state.eindex);
-    // console.log(this.state.rindex);
+    console.log(this.state.voucher_obj);
     return (
       <div className="page-content">
         <Helmet>
