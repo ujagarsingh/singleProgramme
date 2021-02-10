@@ -89,7 +89,7 @@ function getSumOfBalanceAndTypeHandler(state_voucher) {
       total_dr += Number(elem.tr_amount);
     }
   });
-  return { total_cr: total_cr, total_dr: total_dr, tr_type : (total_cr < total_dr) ? "CR" : "DR", };
+  return { total_cr: total_cr, total_dr: total_dr, tr_type : (total_cr < total_dr) ? "DR" : "CR", };
 }
 
 function filterDataHandler(ldr_list, value) {
@@ -139,13 +139,13 @@ function effectedLedgerHandler(vchr_type, all_ledgers) {
   switch (vchr_type) {
     case "Payment":
       // code
-      ldr_debit = [12];
-      ldr_credit = [11];
+      ldr_debit = [11];
+      ldr_credit = [12];
       break;
     case "Receipt":
       // code
-      ldr_credit = [12];
-      ldr_debit = [10];
+      ldr_credit = [10];
+      ldr_debit = [12];
       break;
     default:
       // code
