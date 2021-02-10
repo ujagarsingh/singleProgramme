@@ -78,6 +78,7 @@ class SingleEntry extends Component {
               return (
                 <li
                   className={cursor === index ? 'active' : null}
+                  onClick={event => this.props.activeThisHandler(index)}
                   key={index}>
                   {item.item}
                 </li>
@@ -96,7 +97,7 @@ class SingleEntry extends Component {
     // console.log(adj_list);
     return (
       <div className="list-accunts">
-        <div className="list-acc-head">Adjestment Type</div>
+        <div className="list-acc-head">Pending Adjestment(s)</div>
         <div className="list-acc-body" id="ldrList">
           <table className="table table-bordered table-sm m-0">
             <tbody>
@@ -104,6 +105,7 @@ class SingleEntry extends Component {
                 return (
                   <tr
                     className={cursor === index ? 'active' : null}
+                    onClick={event => this.props.activeThisHandler(index)}
                     key={index}>
                     <td>{elem.ldr_ref_id}</td>
                     <td>{elem.id}</td>
@@ -173,24 +175,11 @@ class SingleEntry extends Component {
           </div>
           <div className="head-amount">
             <div className="dr-total">
-              {(eItem.tr_type == "CR") ?
+              {(eItem.tr_type == "DR") ?
                 <input type="number"
                   value={eItem.tr_amount}
                   data-method={eItem.adjustment}
                   data-ccenter={eItem.cost_center}
-                  data-eindex={eIndex}
-                  data-ename={'ldr_amo'}
-                  disabled={(lockInputs) ? true : false}
-                  className="form-control trans-input tr-amount form-control-sm"
-                  onChange={event => this.props.changeHandler(event, `ldr_amo`, null, eIndex, `CR`)}
-                  onFocus={event => this.setCredentialsHandler(event, eIndex, null, null)}
-                />
-                : null}
-            </div>
-            <div className="cr-total">
-              {(eItem.tr_type == "DR") ?
-                <input type="number"
-                  value={eItem.tr_amount}
                   data-eindex={eIndex}
                   data-ename={'ldr_amo'}
                   disabled={(lockInputs) ? true : false}
@@ -200,9 +189,22 @@ class SingleEntry extends Component {
                 />
                 : null}
             </div>
+            <div className="cr-total">
+              {(eItem.tr_type == "CR") ?
+                <input type="number"
+                  value={eItem.tr_amount}
+                  data-eindex={eIndex}
+                  data-ename={'ldr_amo'}
+                  disabled={(lockInputs) ? true : false}
+                  className="form-control trans-input tr-amount form-control-sm"
+                  onChange={event => this.props.changeHandler(event, `ldr_amo`, null, eIndex, `CR`)}
+                  onFocus={event => this.setCredentialsHandler(event, eIndex, null, null)}
+                />
+                : null}
+            </div>
           </div>
         </div>
-        {eItem.ledger_name &&  (eIndex === eindex) && 
+        {eItem.ledger_name && 
         <div className="crnt-balance-head">
           <div className="bal-head">
             <span className="txt-normal">Cur Bal :</span> {eItem.ldr_crnt_balance}
@@ -211,7 +213,7 @@ class SingleEntry extends Component {
           </div>
         </div>
         }
-        {eItem.adjustment && eItem.tr_amount &&  (eIndex === eindex) && 
+        {eItem.adjustment && eItem.tr_amount && 
           <div className="adjestment-head">
             {eItem.ref_child.map((rItemm, rIndex) => {
               return (
@@ -236,28 +238,28 @@ class SingleEntry extends Component {
                     }
                   </div>
                   {(rItemm.ref_type === 'New Ref') ?
-                    <div className="ref-no">
+                    <div className="ref-name">
                       <input type="text"
-                        readOnly={true}
-                        placeholder={"Refs No"}
+                        // readOnly={true}
+                        placeholder={"Refs Name"}
                         data-eindex={eIndex}
                         data-rindex={rIndex}
-                        data-ename={'refs_no'}
-                        defaultValue={rItemm.ref_no}
+                        data-ename={'ref_name'}
+                        value={rItemm.ref_name}
                         // changeHandler = (event, fieldName, isCheckbox, eIndex, trType, rIndex)
-                        // onChange={event => this.props.changeHandler(event, `refs_no`, null, eIndex, null, rIndex)}
+                        onChange={event => this.props.changeHandler(event, `ref_name`, null, eIndex, null, rIndex)}
                         className="form-control trans-input tr-amount form-control-sm" />
                     </div>
                     : null}
-                  {(rItemm.ref_type === 'Adjestment') ?
-                    <div className="ref-no">
+                  {(rItemm.ref_type === 'Agst Ref') ?
+                    <div className="ref-name">
                       <input type="text"
                         readOnly={true}
-                        placeholder={"Refs No"}
+                        placeholder={"Refs Name"}
                         data-eindex={eIndex}
                         data-rindex={rIndex}
-                        data-ename={'refs_no'}
-                        defaultValue={rItemm.ref_no}
+                        data-ename={'ref_name'}
+                        defaultValue={rItemm.ref_name}
                         // onFocus={() => { this.props.activeRefListFlag() }}
                         onFocus={event => this.setCredentialsHandler(event, eIndex, rIndex, 'old_refs')}
                         className="form-control trans-input tr-amount form-control-sm" />
@@ -299,7 +301,7 @@ class SingleEntry extends Component {
           <div className="adjestment-head">
             <div className="adjt-head">
               <span className="ref-type">Cost Center</span>
-              <span className="ref-no">10</span>
+              <span className="ref-name">10</span>
               <span className="tr-amount">10,000</span>
               <span className="tr-type">Cr</span>
             </div>
