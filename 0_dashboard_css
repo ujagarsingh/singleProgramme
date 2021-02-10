@@ -2286,7 +2286,7 @@ select.form-control {
   font-weight: normal;
 }
 .av-detail-head .adjestment-head .ref-type{ margin-right: 10px; min-width: 50px;  display: inline-block; position: relative;}
-.av-detail-head .adjestment-head .ref-no{margin-right: 10px; min-width: 75px;  display: inline-block;}
+.av-detail-head .adjestment-head .ref-name{margin-right: 10px; min-width: 75px;  display: inline-block;}
 .av-detail-head .adjestment-head .tr-amount{margin-right: 10px;min-width: 75px;  display: inline-block; text-align: right; font-weight: bold;}
 .av-detail-head .adjestment-head .tr-type{margin-right: 10px;  display: inline-block;}
 
@@ -2319,7 +2319,7 @@ select.form-control {
   width: 220px;
   flex-direction: column;
 }
-.ref-no .list-accunts,
+.ref-name .list-accunts,
 .ref-type .list-accunts{   height: min-content;    width: max-content; margin-top: 2px; left: 0; right: unset;}  
 .list-accunts .list-acc-head{    
   background: #115445;
