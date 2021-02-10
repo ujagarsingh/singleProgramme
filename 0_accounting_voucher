@@ -20,19 +20,19 @@ class AccountingVoucher extends Component {
     list_type: 'ledger',
     eindex: null,
     rindex: null,
-    refs_type: [{ id: 1, item: "New Ref" }, { id: 2, item: "Adjestment" }, { id: 3, item: "Advance" }, { id: 4, item: "On Account" }],
+    refs_type: [{ id: 1, item: "New Ref" }, { id: 2, item: "Agst Ref" }, { id: 3, item: "Advance" }, { id: 4, item: "On Account" }],
     adj_list: [],
     filter_data: [],
     credit_ledgers: [],
     debit_ledgers: [],
     current_ldr: '',
-    vchr_type: 'Journal',
+    vchr_type: 'Receipt',
     first_vchr_type: 'CR',
     voucher_obj: {
       child: [
         {
           ldr_ref_id: '', tr_amount: '', tr_type: "CR", ledger_name: '', adjustment: '', cost_center: '',
-          ref_child: [{ id: "", ref_type: "", ref_no: "", tr_amount: "", tr_type: "" }]
+          ref_child: [{ id: "", ref_type: "", ref_name: "", tr_amount: "", tr_type: "" }]
         }
       ]
     },
@@ -79,8 +79,8 @@ class AccountingVoucher extends Component {
     // this.to.openCalendar();
   };
 
-  getCurrentLDRbalanceAndtypeHandler(ldr_id){
-  const { adjustments } = this.props.accountManager;
+  getCurrentLDRbalanceAndtypeHandler(ldr_id) {
+    const { adjustments } = this.props.accountManager;
     let adj_list = [];
     if (adjustments.length > 0) {
       adj_list = adjustments.filter(e => e.ldr_ref_id === ldr_id)
@@ -102,9 +102,11 @@ class AccountingVoucher extends Component {
       _voucher_obj.child[eindex]['ledger_name'] = current_ldr['ledger_name'];
       _voucher_obj.child[eindex]['adjustment'] = current_ldr['adjustment'];
       _voucher_obj.child[eindex]['cost_center'] = current_ldr['cost_center'];
-      _voucher_obj.child[eindex]['ldr_crnt_balance'] = ldrBAT['total_cr'] - ldrBAT['total_dr'];
+      _voucher_obj.child[eindex]['ldr_last_balance'] = Math.abs(ldrBAT['total_cr'] - ldrBAT['total_dr']);
+      _voucher_obj.child[eindex]['ldr_crnt_balance'] = Math.abs(ldrBAT['total_cr'] - ldrBAT['total_dr']);
+      _voucher_obj.child[eindex]['ldr_last_balance_type'] = ldrBAT['tr_type'];
       _voucher_obj.child[eindex]['ldr_crnt_balance_type'] = ldrBAT['tr_type'];
-      _voucher_obj.child[eindex]['ref_child'] = [{ id: "", ref_type: "", ref_no: "", tr_amount: "", tr_type: "" }];
+      _voucher_obj.child[eindex]['ref_child'] = [{ id: "", ref_type: "", ref_name: "", tr_amount: "", tr_type: "" }];
       // alert(1);
       this.setState({
         voucher_obj: _voucher_obj,
@@ -231,11 +233,11 @@ class AccountingVoucher extends Component {
           acc_ref_flag: false
         },
       })
-    } else if (fieldName === 'refs_no') {
+    } else if (fieldName === 'ref_name') {
       // debugger;
       // let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
       const _val = event.target.value;
-      _voucher_obj.child[eIndex].ref_child[rIndex].ref_no = _val;
+      _voucher_obj.child[eIndex].ref_child[rIndex].ref_name = _val;
       this.setState({
         voucher_obj: _voucher_obj,
         formIsHalfFilledOut: true, refs_flag: {
@@ -270,7 +272,12 @@ class AccountingVoucher extends Component {
     let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
     const _val = e.target.value;
     _voucher_obj.child[eIndex].tr_amount = _val;
-    _voucher_obj.child[eIndex].ldr_crnt_balance = _voucher_obj.child[eIndex].ldr_crnt_balance - _val;
+    const lastBalanType = _voucher_obj.child[eIndex].ldr_last_balance_type;
+    if (trType === lastBalanType) {
+      _voucher_obj.child[eIndex].ldr_crnt_balance = _voucher_obj.child[eIndex].ldr_last_balance + _val;
+    } else {
+      _voucher_obj.child[eIndex].ldr_crnt_balance = _voucher_obj.child[eIndex].ldr_last_balance - _val;
+    }
     this.setState({
       list_type: '',
       last_fieldName: fieldName,
@@ -313,10 +320,10 @@ class AccountingVoucher extends Component {
     } else {
       // const ename = ev.target.dataset.ename;
       if ((ename === 'ldr_amo' || ename === 'ref_tr_amo') && isEmpty(_val)) {
-        alert("Insert a valid input first !!!!!")
+        // alert("Insert a valid input first !!!!!")
       } else {
         const { list_type } = this.state;
-        if (ename === "ref_type" || ename === "refs_no") {
+        if ((ename === "ref_type" || ename === "ref_name") && !isEmpty(list_type)) {
           if (list_type === "adjustment") {
             this.refsTypeHandler(ev);
           } else if (list_type === "old_refs") {
@@ -327,7 +334,7 @@ class AccountingVoucher extends Component {
             const nextInput = allinput[nextTi]
             accMethod.selectAndFocusNext(nextInput);
           }
-        } else if (ename === "ref_tr_amo") {
+        } else if (ename === "ref_tr_amo" && isEmpty(list_type)) {
           this.getNewRefsVSledgerHandler(ev);
         } else {
           this.ledgerNameAndAmountHandler(ev)
@@ -338,6 +345,7 @@ class AccountingVoucher extends Component {
   }
 
   ledgerNameAndAmountHandler(ev) {
+    // debugger
     ev.preventDefault();
     const allinput = getAllInputs();
     let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
@@ -371,14 +379,14 @@ class AccountingVoucher extends Component {
           alert('Something is Wrong!')
         }
       } else {
-        console.log("select next")
-        console.log(this.state.cursor);
+        // console.log("select next")
+        // console.log(this.state.cursor);
         accMethod.selectAndFocusNext(nextInput);
       }
     }
     if (ev.target.dataset.ename === 'ldr_name') {
-      console.log("choose ldr")
-      console.log(this.state.cursor);
+      // console.log("choose ldr")
+      // console.log(this.state.cursor);
       this.chooseLedgerHandler();
     }
   }
@@ -459,7 +467,7 @@ class AccountingVoucher extends Component {
         // () => { accMethod.focusFirstHandler(); }
       )
     } else {
-      // accMethod.focusFirstHandler();
+      accMethod.focusFirstHandler();
     }
   }
 
@@ -521,11 +529,11 @@ class AccountingVoucher extends Component {
       switch (val) {
         case "Receipt":
           // Receipt Voucher
-          this.addNewVoucher("DR", val);
+          this.addNewVoucher("CR", val);
           break;
         case "Payment":
           // Receipt Voucher
-          this.addNewVoucher("CR", val);
+          this.addNewVoucher("DR", val);
           break;
         case "Contra":
           // Receipt Voucher
@@ -533,7 +541,7 @@ class AccountingVoucher extends Component {
           break;
         default:
           // Journal
-          this.addNewVoucher("CR", val);
+          this.addNewVoucher("DR", val);
       }
     }
   }
@@ -544,11 +552,12 @@ class AccountingVoucher extends Component {
       voucher_obj: {
         "child": [{
           ldr_ref_id: '', tr_amount: '', tr_type: tr_type, ledger_name: '', adjustment: '', cost_center: '',
-          ref_child: [{ id: "", ref_type: "", ref_no: "", tr_amount: "", tr_type: "" }]
+          ref_child: [{ id: "", ref_type: "", ref_name: "", tr_amount: "", tr_type: "" }]
         }],
         narration: ''
       },
       lockInputs: false,
+      list_type: '',
       vchr_type: vchr_type,
       first_vchr_type: tr_type,
       formIsHalfFilledOut: true
@@ -580,7 +589,10 @@ class AccountingVoucher extends Component {
       </div>
     </div>
   };
-
+  activeThisHandler = (index) => {
+    // console.log("aaa")
+    // this.setState({ cursor: index })
+  }
   filteredLedgerListHandler(filter_data, cursor) {
     if (filter_data.length > 0) {
       return (<div className="list-accunts">
@@ -591,6 +603,7 @@ class AccountingVoucher extends Component {
               return (
                 <li
                   className={cursor === index ? 'active' : null}
+                  onClick={event => this.activeThisHandler(index)}
                   key={index}>
                   {item.ledger_name}
                 </li>
@@ -614,7 +627,7 @@ class AccountingVoucher extends Component {
     this.setState({
       // refs_type_flag: true,
       // list_type: 'adjustment',
-      cursor: (ename === 'ref_type' || ename === 'refs_no') ? 0 : _cursor,
+      cursor: (ename === 'ref_type' || ename === 'ref_name') ? 0 : _cursor,
       list_type: list_type,
       eindex: eIndex,
       rindex: rIndex,
@@ -649,10 +662,10 @@ class AccountingVoucher extends Component {
     _voucher_obj.child[eindex].ref_child[rindex]['ref_type'] = crRef.item;
     // elem = { ...elem, id: crRef.id, ref_type: crRef.item }
     if (crRef.id === 1) {       // console.log("New Ref")
-      const last = this.props.accountManager.adjustments.length;
-      const _ref_no = Number(this.props.accountManager.adjustments[last - 1].id) + 1;
+      // const last = this.props.accountManager.adjustments.length;
+      // const _ref_name = Number(this.props.accountManager.adjustments[last - 1].id) + 1;
+      // _voucher_obj.child[eindex].ref_child[rindex]['ref_name'] = _ref_name;
       new_ref_flag = true;
-      _voucher_obj.child[eindex].ref_child[rindex]['ref_no'] = _ref_no;
     } else if (crRef.id === 2) {      // console.log("Adjustment")
       adj_ref_flag = true;
     } else if (crRef.id === 3) {      // console.log("Advance")
@@ -698,7 +711,7 @@ class AccountingVoucher extends Component {
     const adjData = adj_list[cursor];
     // console.log(adjData);
     let _voucher_obj = JSON.parse(JSON.stringify(voucher_obj));
-    _voucher_obj.child[eindex].ref_child[rindex]['ref_no'] = adjData.id;
+    _voucher_obj.child[eindex].ref_child[rindex]['ref_name'] = adjData.id;
     _voucher_obj.child[eindex].ref_child[rindex]['tr_amount'] = adjData.tr_amount;
 
     this.setState({
@@ -715,34 +728,35 @@ class AccountingVoucher extends Component {
       refs_flag: { new_ref_flag: false, adj_ref_flag: true, adv_ref_flag: false, acc_ref_flag: false },
     })
   }
-  
+
 
   updateRefsTransetionAmountHandler = (event, eIndex, rIndex, trType, fieldName) => {
     let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
     //let final_voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
     const _val = event.target.value;
     _voucher_obj.child[eIndex].ref_child[rIndex].tr_amount = _val;
-    const ldr_amo = Number(_voucher_obj.child[eIndex].tr_amount);
-    let ref_amo = 0;
-    _voucher_obj.child[eIndex].ref_child.forEach((elem) => {
-      ref_amo += Number(elem.tr_amount)
-    });
-    if (ldr_amo >= ref_amo) {
-      // alert("right")
-      console.log(_voucher_obj);
-      this.setState({
-        list_type: '',
-        voucher_obj: _voucher_obj,
-        formIsHalfFilledOut: true, refs_flag: {
-          new_ref_flag: false,
-          adj_ref_flag: false,
-          adv_ref_flag: false,
-          acc_ref_flag: false
-        },
-      })
-    } else {
-      alert("Please Check Entered Amount");
-    }
+    // const _last_amo = _voucher_obj.child[eIndex].ref_child[rIndex].tr_amount;
+    // const ldr_amo = Number(_voucher_obj.child[eIndex].tr_amount);
+    // let ref_amo = 0;
+    // _voucher_obj.child[eIndex].ref_child.forEach((elem) => {
+    //   ref_amo += Number(elem.tr_amount)
+    // });
+    // if ((ldr_amo >= ref_amo) || (_last_amo > _val)) {
+    // alert("right")
+    // console.log(_voucher_obj);
+    this.setState({
+      list_type: '',
+      voucher_obj: _voucher_obj,
+      formIsHalfFilledOut: true, refs_flag: {
+        new_ref_flag: false,
+        adj_ref_flag: false,
+        adv_ref_flag: false,
+        acc_ref_flag: false
+      },
+    })
+    // } else {
+    //   alert("Please Check Entered Amount");
+    // }
   }
 
   addNewRefsHandler = (ev) => {
@@ -751,7 +765,7 @@ class AccountingVoucher extends Component {
     // const rindex = ev.target.dataset.rindex;
     // const ename = ev.target.dataset.ename;
     const voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
-    const new_ref_obj = { id: "", ref_type: "", ref_no: "", tr_amount: "", tr_type: "" };
+    const new_ref_obj = { id: "", ref_type: "", ref_name: "", tr_amount: "", tr_type: "" };
     voucher_obj.child[eindex].ref_child.push(new_ref_obj);
     this.setState({
       voucher_obj: voucher_obj,
@@ -763,6 +777,7 @@ class AccountingVoucher extends Component {
   }
 
   getNewRefsVSledgerHandler = (ev) => {
+    debugger
     let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
     const _eindex = ev.target.dataset.eindex;
     const ldr_amo = Number(_voucher_obj.child[_eindex].tr_amount);
@@ -771,14 +786,29 @@ class AccountingVoucher extends Component {
       ref_amo += Number(elem.tr_amount)
     });
     if (ldr_amo === ref_amo) {
-      this.ledgerNameAndAmountHandler(ev)
+      // remove extra refs
+      const _rindex = Number(ev.target.dataset.rindex);
+      const ref_child_count = _voucher_obj.child[_eindex].ref_child.length;
+      if (ref_child_count > _rindex + 1) {
+        const _refs = _voucher_obj.child[_eindex].ref_child.filter((item, inx) => {
+          return inx <= _rindex;
+        })
+        _voucher_obj.child[_eindex].ref_child = _refs;
+        this.setState({
+          voucher_obj: _voucher_obj
+        }, () => { this.ledgerNameAndAmountHandler(ev) })
+      } else {
+        this.ledgerNameAndAmountHandler(ev)
+      }
     } else if (ldr_amo > ref_amo) {
       this.addNewRefsHandler(ev)
     } else if (ldr_amo < ref_amo) {
-      alert("Invalid amount")
-    } else if (ref_amo === '') {
-      alert("Invalid amount")
+      // alert("Invalid amount")
+      this.ledgerNameAndAmountHandler(ev)
     }
+    // else if (ref_amo === '') {
+    //   alert("Invalid amount")
+    // }
   }
 
 
@@ -789,7 +819,7 @@ class AccountingVoucher extends Component {
     const { voucher_obj, filter_data, vchr_type, refs_type, refs_type_flag, list_type, refs_flag, adj_list,
       eindex, rindex,
       formIsHalfFilledOut, cursor, vchr_date, lockInputs, credit_ledgers, debit_ledgers } = this.state;
-    console.log(this.state.voucher_obj);
+    // console.log(this.state.voucher_obj);
     return (
       <div className="page-content">
         <Helmet>
@@ -874,6 +904,7 @@ class AccountingVoucher extends Component {
                             list_type={list_type}
                             setCredentialsHandler={this.setCredentialsHandler}
                             activeRefListFlag={this.activeRefListFlag}
+                            activeThisHandler={this.activeThisHandler}
                             eItem={item}
                             credit_ledgers={credit_ledgers}
                             debit_ledgers={debit_ledgers}
