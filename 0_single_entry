@@ -38,28 +38,13 @@ class SingleEntry extends Component {
     }
   };
 
-  blurHandler = (event, fieldName, isCheckbox, eIndex, inputType) => {
+  blurHandler = (event, fieldName, eIndex, rIndex) => {
     const _val = event.target.value;
-    if (fieldName === 'ldr_type') {
+    if (fieldName === 'ref_tr_type' || fieldName === 'ldr_type') {
       const V1 = _val.toUpperCase();
       if (V1 === "C" || V1 === "D") {
         const V2 = (V1 === "C") ? "CR" : "DR";
-        this.props.valueTOchangeHandler(V2, eIndex)
-      }
-
-    } else if (fieldName === 'ldr_name') {
-      debugger;
-      if (isEmpty(_val)) {
-        // event.target.focus();
-      } else {
-        // this.props.setFilteredDataHandler();
-      }
-    } else if (fieldName === 'ldr_amo') {
-
-      if (isEmpty(_val)) {
-        // event.target.focus();
-      } else {
-        // this.calculateANDautofillAmountHandler(event, fieldName, isCheckbox, eIndex, inputType);
+        this.props.valueTOchangeHandler(V2, eIndex, rIndex)
       }
     }
   };
@@ -156,7 +141,7 @@ class SingleEntry extends Component {
                 maxLength="2"
                 className="form-control trans-input tr-type form-control-sm"
                 onChange={event => this.props.changeHandler(event, `ldr_type`, null, eIndex)}
-                onBlur={event => this.blurHandler(event, `ldr_type`, null, eIndex)}
+                onBlur={event => this.blurHandler(event, `ldr_type`, eIndex, null)}
                 onFocus={event => this.setCredentialsHandler(event, eIndex, null, null)}
               />
             </span>
@@ -169,13 +154,13 @@ class SingleEntry extends Component {
               className="form-control trans-input tr-name form-control-sm"
               onChange={event => this.props.changeHandler(event, `ldr_name`, null, eIndex)}
               onFocus={event => this.ledgerListHandler(event, eIndex, null, "ledger")}
-              // onClick={event => this.ledgerListHandler(event, eIndex, null, "ledger")}
+            // onClick={event => this.ledgerListHandler(event, eIndex, null, "ledger")}
             //onBlur={event => this.blurHandler(event, `ldr_name`, null, eIndex)}
             />
           </div>
           <div className="head-amount">
             <div className="dr-total">
-              {(eItem.tr_type == "DR") ?
+              {(eItem.tr_type === "DR") ?
                 <input type="number"
                   value={eItem.tr_amount}
                   data-method={eItem.adjustment}
@@ -190,7 +175,7 @@ class SingleEntry extends Component {
                 : null}
             </div>
             <div className="cr-total">
-              {(eItem.tr_type == "CR") ?
+              {(eItem.tr_type === "CR") ?
                 <input type="number"
                   value={eItem.tr_amount}
                   data-eindex={eIndex}
@@ -204,16 +189,16 @@ class SingleEntry extends Component {
             </div>
           </div>
         </div>
-        {eItem.ledger_name && 
-        <div className="crnt-balance-head">
-          <div className="bal-head">
-            <span className="txt-normal">Cur Bal :</span> {eItem.ldr_crnt_balance}
-            <span className="txt-normal ml-1">{eItem.ldr_crnt_balance_type}</span> 
-            <span className="txt-normal ml-4">ID :</span> {eItem.ldr_ref_id}
+        {eItem.ledger_name &&
+          <div className="crnt-balance-head">
+            <div className="bal-head">
+              <span className="txt-normal">Cur Bal :</span> {eItem.ldr_crnt_balance}
+              <span className="txt-normal ml-1">{eItem.ldr_crnt_balance_type}</span>
+              <span className="txt-normal ml-4">ID :</span> {eItem.ldr_ref_id}
+            </div>
           </div>
-        </div>
         }
-        {eItem.adjustment && eItem.tr_amount && 
+        {eItem.adjustment && eItem.tr_amount &&
           <div className="adjestment-head">
             {eItem.ref_child.map((rItemm, rIndex) => {
               return (
@@ -237,20 +222,8 @@ class SingleEntry extends Component {
                       </div>
                     }
                   </div>
-                  {(rItemm.ref_type === 'New Ref') ?
-                    <div className="ref-name">
-                      <input type="text"
-                        // readOnly={true}
-                        placeholder={"Refs Name"}
-                        data-eindex={eIndex}
-                        data-rindex={rIndex}
-                        data-ename={'ref_name'}
-                        value={rItemm.ref_name}
-                        // changeHandler = (event, fieldName, isCheckbox, eIndex, trType, rIndex)
-                        onChange={event => this.props.changeHandler(event, `ref_name`, null, eIndex, null, rIndex)}
-                        className="form-control trans-input tr-amount form-control-sm" />
-                    </div>
-                    : null}
+                  {/* {rItemm.ref_name &&
+                    <> */}
                   {(rItemm.ref_type === 'Agst Ref') ?
                     <div className="ref-name">
                       <input type="text"
@@ -260,7 +233,6 @@ class SingleEntry extends Component {
                         data-rindex={rIndex}
                         data-ename={'ref_name'}
                         defaultValue={rItemm.ref_name}
-                        // onFocus={() => { this.props.activeRefListFlag() }}
                         onFocus={event => this.setCredentialsHandler(event, eIndex, rIndex, 'old_refs')}
                         className="form-control trans-input tr-amount form-control-sm" />
                       {(list_type === "old_refs") && (eIndex === eindex) && (rIndex === rindex) &&
@@ -270,28 +242,46 @@ class SingleEntry extends Component {
                       }
                     </div>
                     : null}
+
+                  {(rItemm.ref_type === 'New Ref') ?
+                    <div className="ref-name">
+                      <input type="text"
+                        placeholder={"Refs Name"}
+                        data-eindex={eIndex}
+                        data-rindex={rIndex}
+                        data-ename={'ref_name'}
+                        defaultValue={rItemm.ref_name + "_" + rIndex}
+                        onFocus={event => this.setCredentialsHandler(event, eIndex, rIndex, null)}
+                        onChange={event => this.props.changeHandler(event, `ref_name`, null, eIndex, null, rIndex)}
+                        className="form-control trans-input tr-amount form-control-sm" />
+                    </div>
+                    : null
+                  }
                   <div className="tr-amount">
                     <input type="number"
                       placeholder={"Amount"}
                       data-eindex={eIndex}
                       data-rindex={rIndex}
-                      data-ename={'ref_tr_amo'}
-                      value={rItemm.tr_amount}
+                      data-ename={'ref_tr_amount'}
+                      defaultValue={rItemm.ref_tr_amount + ""}
                       onFocus={event => this.setCredentialsHandler(event, eIndex, rIndex, null)}
-                      onChange={event => this.props.changeHandler(event, `ref_tr_amo`, null, eIndex, eItem.tr_type, rIndex)}
+                      onChange={event => this.props.changeHandler(event, `ref_tr_amount`, null, eIndex, eItem.tr_type, rIndex)}
                       className="form-control trans-input tr-amount form-control-sm" /></div>
-                  {/* <div className="tr-type">
+                  <div className="tr-type">
                     <input type="text"
-                      value={eItem.ref_tr_type}
-                      data-index={eIndex}
-                      data-ref-index={rIndex}
                       //placeholder={"Cr/Dr"}
+                      data-eindex={eIndex}
+                      data-rindex={rIndex}
+                      data-ename={'ref_tr_type'}
                       maxLength="2"
+                      defaultValue={rItemm.ref_tr_type}
                       className="form-control trans-input tr-type form-control-sm"
                       onChange={event => this.props.changeHandler(event, `ref_tr_type`, null, eIndex, null, rIndex)}
-                      onBlur={event => this.blurHandler(event, `ref_tr_type`, null, eIndex, null, rIndex)}
+                      onBlur={event => this.blurHandler(event, `ref_tr_type`, eIndex, rIndex)}
                     />
-                  </div> */}
+                  </div>
+                  {/* </>
+                  } */}
                 </div>
               )
             })}
