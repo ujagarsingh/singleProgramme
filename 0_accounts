@@ -6,7 +6,8 @@ export {
   effectedLedgerHandler,
   getNextInputHandler,
   selectAndFocusNext,
-  getSumOfBalanceAndTypeHandler
+  getSumOfBalanceAndTypeHandler,
+  getRefExpectedBalanceHandler
 };
 
 function focusFirstHandler() {
@@ -65,9 +66,40 @@ function getSumOfBalanceHandler(state_voucher) {
   return { total_cr: total_cr, total_dr: total_dr };
 }
 
+
+function getRefExpectedBalanceHandler(_voucher_obj, _eindex) {
+  const ldr_amo = Number(_voucher_obj.child[_eindex].tr_amount);
+  const ldr_type = _voucher_obj.child[_eindex].tr_type;
+  let cr_ref_amo = 0;
+  let dr_ref_amo = 0;
+  let expec_amo = 0;
+  let expec_type = '';
+  _voucher_obj.child[_eindex].ref_child.forEach((elem) => {
+    if (elem.ref_tr_type === "CR") {
+      const _crval = Number(elem.tr_amount);
+      cr_ref_amo += isNaN(_crval) ? 0 : _crval;
+    } else {
+      const _drval = Number(elem.tr_amount);
+      dr_ref_amo += isNaN(_drval) ? 0 : _drval;
+    }
+  });
+
+  if (cr_ref_amo === 0 && dr_ref_amo === 0) {
+    expec_amo = ldr_amo;
+    expec_type = ldr_type;
+  } else {
+    const diff = Math.abs(cr_ref_amo - dr_ref_amo);
+    expec_amo = Math.abs(ldr_amo - diff);
+    expec_type = (ldr_amo < diff) ? "DR" : "CR";
+  }
+  const obj = {
+    cr_ref_amo, dr_ref_amo, ldr_amo, expec_amo, expec_type
+  };
+  return obj
+}
 function getSumOfBalanceAndTypeHandler(state_voucher) {
   // debugger
-  let sv = state_voucher; 
+  let sv = state_voucher;
   let total_cr = 0;
   let total_dr = 0;
   // console.log(sv);
@@ -89,7 +121,7 @@ function getSumOfBalanceAndTypeHandler(state_voucher) {
       total_dr += Number(elem.tr_amount);
     }
   });
-  return { total_cr: total_cr, total_dr: total_dr, tr_type : (total_cr < total_dr) ? "DR" : "CR", };
+  return { total_cr: total_cr, total_dr: total_dr, tr_type: (total_cr < total_dr) ? "DR" : "CR", };
 }
 
 function filterDataHandler(ldr_list, value) {
