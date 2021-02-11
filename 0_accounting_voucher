@@ -32,7 +32,7 @@ class AccountingVoucher extends Component {
       child: [
         {
           ldr_ref_id: '', tr_amount: '', tr_type: "CR", ledger_name: '', adjustment: '', cost_center: '',
-          ref_child: [{ id: "", ref_type: "", ref_name: "", tr_amount: "", tr_type: "" }]
+          ref_child: [{ id: "", ref_type: "", ref_name: "", ref_tr_amount: "", ref_tr_type: "" }]
         }
       ]
     },
@@ -106,7 +106,7 @@ class AccountingVoucher extends Component {
       _voucher_obj.child[eindex]['ldr_crnt_balance'] = Math.abs(ldrBAT['total_cr'] - ldrBAT['total_dr']);
       _voucher_obj.child[eindex]['ldr_last_balance_type'] = ldrBAT['tr_type'];
       _voucher_obj.child[eindex]['ldr_crnt_balance_type'] = ldrBAT['tr_type'];
-      _voucher_obj.child[eindex]['ref_child'] = [{ id: "", ref_type: "", ref_name: "", tr_amount: "", tr_type: "" }];
+      _voucher_obj.child[eindex]['ref_child'] = [{ id: "", ref_type: "", ref_name: "", ref_tr_amount: "", ref_tr_type: "" }];
       // alert(1);
       this.setState({
         voucher_obj: _voucher_obj,
@@ -154,10 +154,14 @@ class AccountingVoucher extends Component {
   }
 
 
-  valueTOchangeHandler = (val, eIndex) => {
-    // debugger
+  valueTOchangeHandler = (val, eIndex, rIndex) => {
+    debugger
     let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
-    _voucher_obj.child[eIndex].tr_type = val;
+    if (isEmpty(rIndex)) {
+      _voucher_obj.child[eIndex].tr_type = val;
+    } else {
+      _voucher_obj.child[eIndex].ref_child[rIndex].ref_tr_type = val;
+    }
     this.setState({ voucher_obj: _voucher_obj })
   };
 
@@ -169,6 +173,19 @@ class AccountingVoucher extends Component {
       const _val = checkEntryType(event);
       // let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
       _voucher_obj.child[eIndex].tr_type = _val.toUpperCase();
+      this.setState({
+        voucher_obj: _voucher_obj, formIsHalfFilledOut: true, refs_flag: {
+          new_ref_flag: false,
+          adj_ref_flag: false,
+          adv_ref_flag: false,
+          acc_ref_flag: false
+        },
+      })
+    } else if (fieldName === 'ref_tr_type') {
+      // debugger;
+      const _val = checkEntryType(event);
+      // let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+      _voucher_obj.child[eIndex].ref_child[rIndex].ref_tr_type = _val.toUpperCase();
       this.setState({
         voucher_obj: _voucher_obj, formIsHalfFilledOut: true, refs_flag: {
           new_ref_flag: false,
@@ -249,9 +266,9 @@ class AccountingVoucher extends Component {
       })
     } else if (fieldName === 'ldr_amo') {
       this.updateTransetionAmountHandler(event, eIndex, trType, fieldName);
-    } else if (fieldName === 'ref_tr_amo') {
-      debugger;
-      this.updateRefsTransetionAmountHandler(event, eIndex, rIndex, trType, fieldName);
+    } else if (fieldName === 'ref_tr_amount') {
+      //      debugger;
+      this.updateRefsTransetionAmountHandler(event, eIndex, rIndex);
 
     } else {
       this.setState({
@@ -309,7 +326,7 @@ class AccountingVoucher extends Component {
   tabAndEnterHandler(ev) {
     // debugger;
     ev.preventDefault();
-    const _val = ev.target.value;
+    // const _val = ev.target.value;
     const ename = ev.target.dataset.ename;
     if (ev.shiftKey) {
       // alert("Shift Key Active");
@@ -319,27 +336,27 @@ class AccountingVoucher extends Component {
       accMethod.selectAndFocusNext(nextInput);
     } else {
       // const ename = ev.target.dataset.ename;
-      if ((ename === 'ldr_amo' || ename === 'ref_tr_amo') && isEmpty(_val)) {
-        // alert("Insert a valid input first !!!!!")
-      } else {
-        const { list_type } = this.state;
-        if ((ename === "ref_type" || ename === "ref_name") && !isEmpty(list_type)) {
-          if (list_type === "adjustment") {
-            this.refsTypeHandler(ev);
-          } else if (list_type === "old_refs") {
-            this.getOldRefsDataHandler(ev);
-          } else {
-            const allinput = getAllInputs();
-            const nextTi = accMethod.getNextInputHandler(ev, getAllInputs());
-            const nextInput = allinput[nextTi]
-            accMethod.selectAndFocusNext(nextInput);
-          }
-        } else if (ename === "ref_tr_amo" && isEmpty(list_type)) {
-          this.getNewRefsVSledgerHandler(ev);
+      // if ((ename === 'ldr_amo' || ename === 'ref_tr_amount') && isEmpty(_val)) {
+      //   // alert("Insert a valid input first !!!!!")
+      // } else {
+      const { list_type } = this.state;
+      if ((ename === "ref_type" || ename === "ref_name") && !isEmpty(list_type)) {
+        if (list_type === "adjustment") {
+          this.refsTypeHandler(ev);
+        } else if (list_type === "old_refs") {
+          this.getOldRefsDataHandler(ev);
         } else {
-          this.ledgerNameAndAmountHandler(ev)
+          const allinput = getAllInputs();
+          const nextTi = accMethod.getNextInputHandler(ev, getAllInputs());
+          const nextInput = allinput[nextTi]
+          accMethod.selectAndFocusNext(nextInput);
         }
+      } else if (ename === "ref_tr_type" && isEmpty(list_type)) {
+        this.getNewRefsVSledgerHandler(ev);
+      } else {
+        this.ledgerNameAndAmountHandler(ev)
       }
+      // }
     }
 
   }
@@ -552,7 +569,7 @@ class AccountingVoucher extends Component {
       voucher_obj: {
         "child": [{
           ldr_ref_id: '', tr_amount: '', tr_type: tr_type, ledger_name: '', adjustment: '', cost_center: '',
-          ref_child: [{ id: "", ref_type: "", ref_name: "", tr_amount: "", tr_type: "" }]
+          ref_child: [{ id: "", ref_type: "", ref_name: "", ref_tr_amount: "", ref_tr_type: "" }]
         }],
         narration: ''
       },
@@ -658,13 +675,18 @@ class AccountingVoucher extends Component {
     const { cursor, refs_type, voucher_obj, eindex, rindex, } = this.state;
     const crRef = refs_type[cursor];
     let _voucher_obj = JSON.parse(JSON.stringify(voucher_obj));
+
+    const resObj = accMethod.getRefExpectedBalanceHandler(_voucher_obj, eindex, rindex);
+
     _voucher_obj.child[eindex].ref_child[rindex]['id'] = crRef.id;
     _voucher_obj.child[eindex].ref_child[rindex]['ref_type'] = crRef.item;
+    _voucher_obj.child[eindex].ref_child[rindex]['ref_tr_amount'] = resObj.expec_amo;
+    _voucher_obj.child[eindex].ref_child[rindex]['ref_tr_type'] = resObj.expec_type;
     // elem = { ...elem, id: crRef.id, ref_type: crRef.item }
     if (crRef.id === 1) {       // console.log("New Ref")
-      // const last = this.props.accountManager.adjustments.length;
-      // const _ref_name = Number(this.props.accountManager.adjustments[last - 1].id) + 1;
-      // _voucher_obj.child[eindex].ref_child[rindex]['ref_name'] = _ref_name;
+      const last = this.props.accountManager.adjustments.length;
+      const _ref_name = Number(this.props.accountManager.adjustments[last - 1].id) + 1;
+      _voucher_obj.child[eindex].ref_child[rindex]['ref_name'] = _ref_name;
       new_ref_flag = true;
     } else if (crRef.id === 2) {      // console.log("Adjustment")
       adj_ref_flag = true;
@@ -712,7 +734,7 @@ class AccountingVoucher extends Component {
     // console.log(adjData);
     let _voucher_obj = JSON.parse(JSON.stringify(voucher_obj));
     _voucher_obj.child[eindex].ref_child[rindex]['ref_name'] = adjData.id;
-    _voucher_obj.child[eindex].ref_child[rindex]['tr_amount'] = adjData.tr_amount;
+    _voucher_obj.child[eindex].ref_child[rindex]['ref_tr_amount'] = adjData.tr_amount;
 
     this.setState({
       voucher_obj: _voucher_obj,
@@ -730,20 +752,11 @@ class AccountingVoucher extends Component {
   }
 
 
-  updateRefsTransetionAmountHandler = (event, eIndex, rIndex, trType, fieldName) => {
+  updateRefsTransetionAmountHandler = (event, eIndex, rIndex) => {
     let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
-    //let final_voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
     const _val = event.target.value;
     _voucher_obj.child[eIndex].ref_child[rIndex].tr_amount = _val;
-    // const _last_amo = _voucher_obj.child[eIndex].ref_child[rIndex].tr_amount;
-    // const ldr_amo = Number(_voucher_obj.child[eIndex].tr_amount);
-    // let ref_amo = 0;
-    // _voucher_obj.child[eIndex].ref_child.forEach((elem) => {
-    //   ref_amo += Number(elem.tr_amount)
-    // });
-    // if ((ldr_amo >= ref_amo) || (_last_amo > _val)) {
-    // alert("right")
-    // console.log(_voucher_obj);
+
     this.setState({
       list_type: '',
       voucher_obj: _voucher_obj,
@@ -754,9 +767,7 @@ class AccountingVoucher extends Component {
         acc_ref_flag: false
       },
     })
-    // } else {
-    //   alert("Please Check Entered Amount");
-    // }
+
   }
 
   addNewRefsHandler = (ev) => {
@@ -765,7 +776,7 @@ class AccountingVoucher extends Component {
     // const rindex = ev.target.dataset.rindex;
     // const ename = ev.target.dataset.ename;
     const voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
-    const new_ref_obj = { id: "", ref_type: "", ref_name: "", tr_amount: "", tr_type: "" };
+    const new_ref_obj = { id: "", ref_type: "", ref_name: "", ref_tr_amount: "", ref_tr_type: "" };
     voucher_obj.child[eindex].ref_child.push(new_ref_obj);
     this.setState({
       voucher_obj: voucher_obj,
@@ -780,11 +791,22 @@ class AccountingVoucher extends Component {
     debugger
     let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
     const _eindex = ev.target.dataset.eindex;
+    // const res_obj = accMethod.getLedgerANDrefsBalance(_voucher_obj, _eindex);
+    // console.log(res_obj);
+
     const ldr_amo = Number(_voucher_obj.child[_eindex].tr_amount);
-    let ref_amo = 0;
+    let cr_ref_amo = 0;
+    let dr_ref_amo = 0;
     _voucher_obj.child[_eindex].ref_child.forEach((elem) => {
-      ref_amo += Number(elem.tr_amount)
+      if (elem.ref_tr_type === "CR") {
+        cr_ref_amo += Number(elem.tr_amount)
+      } else {
+        dr_ref_amo += Number(elem.tr_amount)
+      }
     });
+    // let ref_type = (cr_ref_amo < dr_ref_amo) ? "CR" : "DR";
+    let ref_amo = Math.abs(cr_ref_amo - dr_ref_amo);
+
     if (ldr_amo === ref_amo) {
       // remove extra refs
       const _rindex = Number(ev.target.dataset.rindex);
@@ -800,15 +822,9 @@ class AccountingVoucher extends Component {
       } else {
         this.ledgerNameAndAmountHandler(ev)
       }
-    } else if (ldr_amo > ref_amo) {
+    } else {
       this.addNewRefsHandler(ev)
-    } else if (ldr_amo < ref_amo) {
-      // alert("Invalid amount")
-      this.ledgerNameAndAmountHandler(ev)
     }
-    // else if (ref_amo === '') {
-    //   alert("Invalid amount")
-    // }
   }
 
 
