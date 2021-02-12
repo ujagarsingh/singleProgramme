@@ -263,7 +263,7 @@ class SingleEntry extends Component {
                       data-eindex={eIndex}
                       data-rindex={rIndex}
                       data-ename={'ref_tr_amount'}
-                      defaultValue={rItemm.ref_tr_amount + ""}
+                      value={rItemm.ref_tr_amount}
                       onFocus={event => this.setCredentialsHandler(event, eIndex, rIndex, null)}
                       onChange={event => this.props.changeHandler(event, `ref_tr_amount`, null, eIndex, eItem.tr_type, rIndex)}
                       className="form-control trans-input tr-amount form-control-sm" /></div>
@@ -274,10 +274,11 @@ class SingleEntry extends Component {
                       data-rindex={rIndex}
                       data-ename={'ref_tr_type'}
                       maxLength="2"
-                      defaultValue={rItemm.ref_tr_type}
+                      value={rItemm.ref_tr_type}
                       className="form-control trans-input tr-type form-control-sm"
                       onChange={event => this.props.changeHandler(event, `ref_tr_type`, null, eIndex, null, rIndex)}
                       onBlur={event => this.blurHandler(event, `ref_tr_type`, eIndex, rIndex)}
+                      onFocus={event => this.setCredentialsHandler(event, eIndex, rIndex, null)}
                     />
                   </div>
                   {/* </>
