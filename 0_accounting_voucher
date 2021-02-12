@@ -324,7 +324,7 @@ class AccountingVoucher extends Component {
   }
 
   tabAndEnterHandler(ev) {
-    // debugger;
+    debugger;
     ev.preventDefault();
     // const _val = ev.target.value;
     const ename = ev.target.dataset.ename;
@@ -676,13 +676,14 @@ class AccountingVoucher extends Component {
     const crRef = refs_type[cursor];
     let _voucher_obj = JSON.parse(JSON.stringify(voucher_obj));
 
-    const resObj = accMethod.getRefExpectedBalanceHandler(_voucher_obj, eindex, rindex);
-
     _voucher_obj.child[eindex].ref_child[rindex]['id'] = crRef.id;
     _voucher_obj.child[eindex].ref_child[rindex]['ref_type'] = crRef.item;
-    _voucher_obj.child[eindex].ref_child[rindex]['ref_tr_amount'] = resObj.expec_amo;
-    _voucher_obj.child[eindex].ref_child[rindex]['ref_tr_type'] = resObj.expec_type;
-    // elem = { ...elem, id: crRef.id, ref_type: crRef.item }
+    const _crnt_ref_val =  _voucher_obj.child[eindex].ref_child[rindex]['ref_tr_amount'] ;
+    if(isEmpty(_crnt_ref_val)){
+      const resObj = accMethod.getRefExpectedBalanceHandler(_voucher_obj, eindex, rindex);
+      _voucher_obj.child[eindex].ref_child[rindex]['ref_tr_amount'] = resObj.expec_amo;
+      _voucher_obj.child[eindex].ref_child[rindex]['ref_tr_type'] = resObj.expec_type;
+    }
     if (crRef.id === 1) {       // console.log("New Ref")
       const last = this.props.accountManager.adjustments.length;
       const _ref_name = Number(this.props.accountManager.adjustments[last - 1].id) + 1;
@@ -710,9 +711,6 @@ class AccountingVoucher extends Component {
     }, () => {
       this.nextInputManager(ev);
     })
-
-
-
   }
 
   selectLedgerwiseExistingRefsHandler = (id) => {
@@ -755,7 +753,7 @@ class AccountingVoucher extends Component {
   updateRefsTransetionAmountHandler = (event, eIndex, rIndex) => {
     let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
     const _val = event.target.value;
-    _voucher_obj.child[eIndex].ref_child[rIndex].tr_amount = _val;
+    _voucher_obj.child[eIndex].ref_child[rIndex].ref_tr_amount = _val;
 
     this.setState({
       list_type: '',
@@ -791,17 +789,20 @@ class AccountingVoucher extends Component {
     debugger
     let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
     const _eindex = ev.target.dataset.eindex;
+    const _rindex = ev.target.dataset.rindex;
     // const res_obj = accMethod.getLedgerANDrefsBalance(_voucher_obj, _eindex);
     // console.log(res_obj);
 
     const ldr_amo = Number(_voucher_obj.child[_eindex].tr_amount);
     let cr_ref_amo = 0;
     let dr_ref_amo = 0;
-    _voucher_obj.child[_eindex].ref_child.forEach((elem) => {
-      if (elem.ref_tr_type === "CR") {
-        cr_ref_amo += Number(elem.tr_amount)
-      } else {
-        dr_ref_amo += Number(elem.tr_amount)
+    _voucher_obj.child[_eindex].ref_child.forEach((elem, index) => {
+      if(index <= _rindex){
+        if (elem.ref_tr_type === "CR") {
+          cr_ref_amo += Number(elem.ref_tr_amount)
+        } else {
+          dr_ref_amo += Number(elem.ref_tr_amount)
+        }
       }
     });
     // let ref_type = (cr_ref_amo < dr_ref_amo) ? "CR" : "DR";
