@@ -76,10 +76,10 @@ function getRefExpectedBalanceHandler(_voucher_obj, _eindex) {
   let expec_type = '';
   _voucher_obj.child[_eindex].ref_child.forEach((elem) => {
     if (elem.ref_tr_type === "CR") {
-      const _crval = Number(elem.tr_amount);
+      const _crval = Number(elem.ref_tr_amount);
       cr_ref_amo += isNaN(_crval) ? 0 : _crval;
     } else {
-      const _drval = Number(elem.tr_amount);
+      const _drval = Number(elem.ref_tr_amount);
       dr_ref_amo += isNaN(_drval) ? 0 : _drval;
     }
   });
