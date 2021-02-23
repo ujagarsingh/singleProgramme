@@ -7,105 +7,84 @@
  
 <script type="text/javascript">
 
-var vchr1 = {"voucher_obj":{"child":[{"ldr_ref_id":"108_STU_4","tr_amount":"300","tr_type":"CR","ledger_name":"AMAN MEENA S/o HARI NARAYAN MEENA [366/Eigth]","adjustment":true,"cost_center":false,"ref_child":[{"id":1,"ref_type":"New Ref","ref_name":359,"ref_tr_amount":"20","ref_tr_type":"CR"},{"id":1,"ref_type":"New Ref","ref_name":359,"ref_tr_amount":"80","ref_tr_type":"CR"},{"id":1,"ref_type":"New Ref","ref_name":359,"ref_tr_amount":"200","ref_tr_type":"CR"}],"ldr_last_balance":135,"ldr_crnt_balance":-165,"ldr_last_balance_type":"DR","ldr_crnt_balance_type":"DR"},{"ldr_ref_id":"141_STU_4","tr_amount":"120","tr_type":"CR","ledger_name":"AMIT MEENA S/o RAM KISHOR MEENA [419/Eigth]","adjustment":true,"cost_center":false,"ldr_last_balance":135,"ldr_crnt_balance":15,"ldr_last_balance_type":"DR","ldr_crnt_balance_type":"DR","ref_child":[{"id":1,"ref_type":"New Ref","ref_name":359,"ref_tr_amount":120,"ref_tr_type":"CR"}]},{"ldr_ref_id":"3_LDR_4","tr_amount":420,"tr_type":"DR","ledger_name":"Cash","adjustment":false,"cost_center":true,"ldr_last_balance":0,"ldr_crnt_balance":0,"ldr_last_balance_type":"CR","ldr_crnt_balance_type":"CR","ref_child":[{"id":"","ref_type":"","ref_name":"","ref_tr_amount":"","ref_tr_type":""}]}],"cr_total_amo":420,"dr_total_amo":420},"vchr_date":"2021-02-16T01:31:27.045Z","vchr_type":"Receipt"};
+const vchr1 = {"voucher_obj":{"child":[{"ldr_ref_id":"108_STU_4","tr_amount":"300","tr_type":"CR","ledger_name":"AMAN MEENA S/o HARI NARAYAN MEENA [366/Eigth]","adjustment":true,"cost_center":false,"ref_child":[{"id":1,"ref_type":"New Ref","ref_name":359,"ref_tr_amount":"20","ref_tr_type":"CR"},{"id":1,"ref_type":"New Ref","ref_name":359,"ref_tr_amount":"80","ref_tr_type":"CR"},{"id":1,"ref_type":"New Ref","ref_name":359,"ref_tr_amount":"200","ref_tr_type":"CR"}],"ldr_last_balance":135,"ldr_crnt_balance":-165,"ldr_last_balance_type":"DR","ldr_crnt_balance_type":"DR"},{"ldr_ref_id":"141_STU_4","tr_amount":"120","tr_type":"CR","ledger_name":"AMIT MEENA S/o RAM KISHOR MEENA [419/Eigth]","adjustment":true,"cost_center":false,"ldr_last_balance":135,"ldr_crnt_balance":15,"ldr_last_balance_type":"DR","ldr_crnt_balance_type":"DR","ref_child":[{"id":1,"ref_type":"New Ref","ref_name":359,"ref_tr_amount":120,"ref_tr_type":"CR"}]},{"ldr_ref_id":"3_LDR_4","tr_amount":420,"tr_type":"DR","ledger_name":"Cash","adjustment":false,"cost_center":true,"ldr_last_balance":0,"ldr_crnt_balance":0,"ldr_last_balance_type":"CR","ldr_crnt_balance_type":"CR","ref_child":[{"id":"","ref_type":"","ref_name":"","ref_tr_amount":"","ref_tr_type":""}]}],"cr_total_amo":420,"dr_total_amo":420},"vchr_date":"2021-02-16T01:31:27.045Z","vchr_type":"Receipt"};
 
-var vchr2 = {"voucher_obj":{"child":[{"ldr_ref_id":"108_STU_4","tr_amount":"120","tr_type":"CR","ledger_name":"AMAN MEENA S/o HARI NARAYAN MEENA [366/Eigth]","adjustment":true,"cost_center":false,"ref_child":[{"id":1,"ref_type":"New Ref","ref_name":359,"ref_tr_amount":120,"ref_tr_type":"CR"}],"ldr_last_balance":135,"ldr_crnt_balance":15,"ldr_last_balance_type":"DR","ldr_crnt_balance_type":"DR"},{"ldr_ref_id":"","tr_amount":120,"tr_type":"","ledger_name":"","adjustment":"","cost_center":""}],"cr_total_amo":120,"dr_total_amo":120},"vchr_date":"2021-02-16T02:27:53.540Z","vchr_type":"Receipt"};
+const vchr2 = {"voucher_obj":{"child":[{"ldr_ref_id":"108_STU_4","tr_amount":"120","tr_type":"CR","ledger_name":"AMAN MEENA S/o HARI NARAYAN MEENA [366/Eigth]","adjustment":true,"cost_center":false,"ref_child":[{"id":1,"ref_type":"New Ref","ref_name":359,"ref_tr_amount":120,"ref_tr_type":"CR"}],"ldr_last_balance":135,"ldr_crnt_balance":15,"ldr_last_balance_type":"DR","ldr_crnt_balance_type":"DR"},{"ldr_ref_id":"","tr_amount":120,"tr_type":"","ledger_name":"","adjustment":"","cost_center":""}],"cr_total_amo":120,"dr_total_amo":120},"vchr_date":"2021-02-16T02:27:53.540Z","vchr_type":"Receipt"};
 
-function objPositionHandler(obj){
-	const _obj = obj.voucher_obj;
-	let final_all_obj = [];
-	let final_obj = [];
-	let final_flag = true;
-	
-	function ldrwithchildHandler(elem){
-		let fl_obj = [];
-		const tr_amo = Number(elem.tr_amount);
-		const tr_type = elem.tr_type;
-		const bal_amo = Number(elem.tr_amount);
-		const bal_type = elem.tr_type;
-		fl_obj.push({tr_amo : 0, tr_type : "", bal_amo, bal_type});
-		
-		let rBal_amo = 0;
-		let rBal_type = "";
 
-		elem.ref_child.forEach((rElem, inx) => {
-			const _rtramo = Number(rElem.ref_tr_amount);
-			const _rtrtype = rElem.ref_tr_type;
-			if(_rtrtype === fl_obj[inx].bal_type){
-				rBal_amo = Math.abs(fl_obj[inx].bal_amo - _rtramo);
-				rBal_type = (rBal_amo === 0) ? "" : _rtrtype;
-			} else if(_rtrtype === "DR" && fl_obj[inx].bal_type === "DR"){
-				rBal_amo = Math.abs(fl_obj[inx].bal_amo - _rtramo);
-				rBal_type = _rtrtype;
-			} else if(_rtrtype === "CR" && fl_obj[inx].bal_type === "DR"){
-				rBal_amo = fl_obj[inx].bal_amo + _rtramo;
-				rBal_type = (fl_obj[inx].bal_amo > _rtramo) ? fl_obj[inx].bal_type : _rtrtype;	
-			} else if(_rtrtype === "DR" && fl_obj[inx].bal_type === "CR"){
-				rBal_amo = fl_obj[inx].bal_amo + _rtramo;
-				rBal_type = (fl_obj[inx].bal_amo > _rtramo) ? fl_obj[inx].bal_type : _rtrtype;	
-			} 
-			fl_obj.push({tr_amo : _rtramo, tr_type : _rtrtype, bal_amo : rBal_amo, bal_type : rBal_type});
-		});
+function testObjectHandler(obj){
+	console.log(obj);
+    let gldr_amo = 0;
+    let glcr_amo = 0;
+    let voucher_test = "error";
+    
+    if(obj.voucher_obj.child.length > 1){
+        
+        const ledger_child = obj.voucher_obj.child.map((l_item, l_inx) => {
 
-		// console.log(fl_obj);
-		if(fl_obj[fl_obj.length - 1].bal_amo === 0){
-			const obj = {fl_obj, res_flag : true};
-			return obj;
-		} else {
-			const obj = {fl_obj, res_flag : false};
-			return obj;
-		}
-		
-	}
+            const ltr_amo = Number(l_item.tr_amount);
+            const ltr_tpe = l_item.tr_type;
 
-	let result_flag = false;
-	_obj.child.forEach((element, inx) => {
+            let rdr_amo = 0;
+            let rcr_amo = 0;
+            let rfi_amo = 0;
+            let rtr_tpe = "";
+            let ledger_test = "error";
 
-		const res = ldrwithchildHandler(element);
-		if(res.res_flag){
-			final_all_obj.push(...res.fl_obj);
-		} else {
-			final_all_obj.push(...res.fl_obj);
-			final_flag : false;
-		}
+            // ledgers
+            if(ltr_tpe === "CR"){
+                glcr_amo += ltr_amo;
+            } else if(ltr_tpe === "DR"){
+                gldr_amo += ltr_amo;
+            }
+            
+            if(l_item.adjustment){
+                if(l_item.ref_child.length > 0){
+                   
+                    /*---------------------------*/
+                    // ref child
+                    l_item.ref_child.map((r_item, r_inx)=>{
+                        if(r_item.ref_tr_type === "CR"){
+                          rcr_amo += Number(r_item.ref_tr_amount);
+                        } else if (r_item.ref_tr_type === "DR") {
+                          rdr_amo += Number(r_item.ref_tr_amount);
+                        }
+                    })
+                    if(rdr_amo !== rcr_amo){
+                        rfi_amo = Math.abs(rdr_amo - rcr_amo);
+                        rtr_tpe = (rdr_amo > rcr_amo) ? "DR" : "CR";
+                    }
 
-		//-------------------------------------------------
+                    if(ltr_amo === rfi_amo && ltr_tpe === rtr_tpe){
+                        ledger_test = "success";
+                    } 
 
-		const tr_amo = Number(element.tr_amount);
-		const tr_type = element.tr_type;
-		const bal_amo = Number(element.tr_amount);
-		const bal_type = element.tr_type;
-		final_all_obj.push({tr_amo : 0, tr_type : "", bal_amo, bal_type});
+                    /*---------------------------*/
+                } else {
+                    ledger_test : "error";            
+                }
+            }
 
-		const _rtramo = Number(element.tr_amount);
-		const _rtrtype = element.tr_type;
-		if(_rtrtype === final_all_obj[inx].bal_type){
-			rBal_amo = Math.abs(final_all_obj[inx].bal_amo - _rtramo);
-			rBal_type = (rBal_amo === 0) ? "" : _rtrtype;
-		} else if(_rtrtype === "DR" && final_all_obj[inx].bal_type === "DR"){
-			rBal_amo = Math.abs(final_all_obj[inx].bal_amo - _rtramo);
-			rBal_type = _rtrtype;
-		} else if(_rtrtype === "CR" && final_all_obj[inx].bal_type === "DR"){
-			rBal_amo = final_all_obj[inx].bal_amo + _rtramo;
-			rBal_type = (final_all_obj[inx].bal_amo > _rtramo) ? final_all_obj[inx].bal_type : _rtrtype;	
-		} else if(_rtrtype === "DR" && final_all_obj[inx].bal_type === "CR"){
-			rBal_amo = final_all_obj[inx].bal_amo + _rtramo;
-			rBal_type = (final_all_obj[inx].bal_amo > _rtramo) ? final_all_obj[inx].bal_type : _rtrtype;	
-		} 
-		final_all_obj.push({tr_amo : _rtramo, tr_type : _rtrtype, bal_amo : rBal_amo, bal_type : rBal_type});
-			
-		//-------------------------------------------------
-
-	});
-	const r1_obj = {final_all_obj, final_obj,	final_flag}
-	return r1_obj;
+            if(l_item.cost_center){
+                ledger_test = "success";
+            }
+            
+            if(glcr_amo === gldr_amo){
+                voucher_test = "success"
+            }
+            return {...l_item, ledger_test};
+        });
+        obj.voucher_obj.child = ledger_child;
+    } else {
+        voucher_test : "error";
+    }
+    return {...obj, voucher_test};
 }
-
-const res = objPositionHandler(vchr1);
-console.table(res);
-console.table(res.final_obj);
-console.table(res.final_all_obj);
-
+const result = testObjectHandler(vchr1);
+console.log(result);
+if(result.voucher_test === "error"){
+	alert("Something is Wrong.!!!!!");
+}
 </script>
 </body>
 </html>
