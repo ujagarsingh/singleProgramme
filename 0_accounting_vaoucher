@@ -1,0 +1,1157 @@
+import React, { Component } from 'react';
+import { Prompt, withRouter } from 'react-router';
+import { Helmet } from "react-helmet";
+import { confirmAlert } from 'react-confirm-alert';
+import Alert from 'react-s-alert';
+import { connect } from 'react-redux';
+import DatePicker from 'react-date-picker';
+
+import * as accMethod from '../utility/accounts';
+import SingleEntry from '../includes/single_entry';
+
+import { voucherSummaryActions, accLedgerEntryActions, accVoucherEntryActions } from '../_actions';
+
+import { isEmptyObj, isEmpty, checkEntryType, getAllInputs } from '../utility/utilities';
+
+class AccountingVoucher extends Component {
+  state = {
+    formIsHalfFilledOut: false,
+    cursor: 0,
+    refs_type_flag: false,
+    list_type: 'ledger',
+    eindex: null,
+    rindex: null,
+    refs_type: [{ id: 1, item: "New Ref" }, { id: 2, item: "Agst Ref" }, { id: 3, item: "Advance" }, { id: 4, item: "On Account" }],
+    adj_list: [],
+    filter_data: [],
+    credit_ledgers: [],
+    debit_ledgers: [],
+    current_ldr: '',
+    vchr_type: 'Receipt',
+    first_vchr_type: 'CR',
+    voucher_obj: {
+      child: [
+        {
+          ldr_ref_id: '', tr_amount: '', tr_type: "CR", ledger_name: '', adjustment: '', cost_center: '',
+          ref_child: [{ id: "", ref_type: "", ref_name: "", ref_tr_amount: "", ref_tr_type: "" }]
+        }
+      ],
+      narration: ""
+    },
+    refs_flag: {
+      new_ref_flag: false,
+      adj_ref_flag: false,
+      adv_ref_flag: false,
+      acc_ref_flag: false
+    },
+    vchr_date: new Date(),
+  }
+
+  setArraowKeysHandler() {
+    document.addEventListener('keydown', (e) => {
+      // debugger;
+      switch (e.keyCode) {
+        case 37:          // console.log('left');
+          this.handleKeyDown("left");
+          break;
+        case 38:          // console.log('up');
+          this.handleKeyDown("up");
+          break;
+        case 39:          // console.log('right');
+          this.handleKeyDown("right");
+          break;
+        case 40:          // console.log('down');
+          this.handleKeyDown("down");
+          break;
+        case 13:          // console.log('Enter');
+          this.tabAndEnterHandler(e);
+          break;
+        case 9:          // console.log('Tab');
+          this.tabAndEnterHandler(e);
+          break;
+        default:        // console.log('something wrong');
+      }
+    });
+    // accMethod.focusFirstHandler();
+  }
+
+  examStartDate = (feeDate) => {
+    this.setState({ vchr_date: feeDate });
+    // this.to.openCalendar();
+  };
+
+  getCurrentLDRbalanceAndtypeHandler(ldr_id) {
+    const { adjustments } = this.props.accountManager;
+    let adj_list = [];
+    if (adjustments.length > 0) {
+      adj_list = adjustments.filter(e => e.ldr_ref_id === ldr_id)
+    }
+    const res = accMethod.getSumOfBalanceAndTypeHandler(adj_list);
+    // console.log(res);
+    return res;
+  }
+
+  chooseLedgerHandler(ev) {
+    //  debugger
+    const { filter_data, cursor } = this.state;
+    if (filter_data.length > 0) {
+      const current_ldr = filter_data[cursor];
+      const _eindex = ev.target.dataset.eindex;
+      const ldrBAT = this.getCurrentLDRbalanceAndtypeHandler(current_ldr['ldr_ref_id']);
+      // console.log(ldrBAT);
+      /*
+      Alias: null
+      adjustment: true
+      class_id: "49"
+      cost_center: false
+      group_type: "P"
+      id: "108"
+      ldr_ref_id: "108_STU_4"
+      ledger_name: "AMAN MEENA S/o HARI NARAYAN MEENA [366/Eigth]"
+      ledger_type: "P"
+      school_id: "4"
+      server_date_time: null
+      type: "STU"
+      under_group: 10
+      */
+      if (!isEmptyObj(current_ldr)) {
+        let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+        _voucher_obj.child[_eindex]['ldr_ref_id'] = current_ldr['ldr_ref_id'];
+        _voucher_obj.child[_eindex]['class_id'] = current_ldr['class_id'];
+        _voucher_obj.child[_eindex]['ledger_name'] = current_ldr['ledger_name'];
+        _voucher_obj.child[_eindex]['under_group'] = current_ldr['under_group'];
+        _voucher_obj.child[_eindex]['group_type'] = current_ldr['group_type'];
+        _voucher_obj.child[_eindex]['adjustment'] = current_ldr['adjustment'];
+        _voucher_obj.child[_eindex]['cost_center'] = current_ldr['cost_center'];
+        _voucher_obj.child[_eindex]['ldr_last_balance'] = Math.abs(ldrBAT['total_cr'] - ldrBAT['total_dr']);
+        _voucher_obj.child[_eindex]['ldr_crnt_balance'] = Math.abs(ldrBAT['total_cr'] - ldrBAT['total_dr']);
+        _voucher_obj.child[_eindex]['ldr_last_balance_type'] = ldrBAT['tr_type'];
+        _voucher_obj.child[_eindex]['ldr_crnt_balance_type'] = ldrBAT['tr_type'];
+        _voucher_obj.child[_eindex]['ref_child'] = [{ id: "", ref_type: "", ref_name: "", ref_tr_amount: "", ref_tr_type: "" }];
+        // alert(1);
+        this.setState({
+          voucher_obj: _voucher_obj,
+          filter_data: []
+          //}, () => { this.selectLedgerwiseExistingRefsHandler(current_ldr['ldr_ref_id']) })
+        })
+      }
+    }
+  }
+
+  handleKeyDown = (key) => {
+    // debugger;
+    // console.log("88-accounting-voucher");
+    const { cursor, filter_data, list_type, refs_type, adj_list } = this.state
+    // arrow up/down button should select next/previous list element
+    if (list_type === "adjustment") {
+      if ((key === "up" || key === "left") && cursor > 0) {
+        this.setState(prevState => ({
+          cursor: prevState.cursor - 1
+        }))
+      } else if ((key === "down" || key === "right") && cursor < refs_type.length - 1) {
+        this.setState(prevState => ({
+          cursor: prevState.cursor + 1
+        }))
+      }
+    } else if (list_type === "old_refs") {
+      if ((key === "up" || key === "left") && cursor > 0) {
+        this.setState(prevState => ({
+          cursor: prevState.cursor - 1
+        }))
+      } else if ((key === "down" || key === "right") && cursor < adj_list.length - 1) {
+        this.setState(prevState => ({
+          cursor: prevState.cursor + 1
+        }))
+      }
+    } else if (list_type === "ledger") {
+      if ((key === "up" || key === "left") && cursor > 0) {
+        this.setState(prevState => ({
+          cursor: prevState.cursor - 1
+        }), () => { accMethod.srollListItemHandler(key, list_type) })
+      } else if ((key === "down" || key === "right") && cursor < filter_data.length - 1) {
+        this.setState(prevState => ({
+          cursor: prevState.cursor + 1
+        }), () => { accMethod.srollListItemHandler(key, list_type) })
+      }
+    }
+  }
+
+
+  valueTOchangeHandler = (val, eIndex, rIndex) => {
+    debugger
+    let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+    if (isEmpty(rIndex)) {
+      _voucher_obj.child[eIndex].tr_type = val;
+    } else {
+      _voucher_obj.child[eIndex].ref_child[rIndex].ref_tr_type = val;
+    }
+    this.setState({ voucher_obj: _voucher_obj })
+  };
+
+  checkLedgerStatusHandler = (ev) => {
+    const eindex = ev.target.dataset.eindex;
+    let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+    const final_voucher = _voucher_obj.child.filter((elem, inx) => {
+      return (inx <= eindex)
+    })
+    _voucher_obj.child = final_voucher;
+    this.setState({
+      voucher_obj: _voucher_obj
+    }, () => { this.nextInputManager(ev) })
+  }
+
+  changeHandler = (event, fieldName, isCheckbox, eIndex, trType, rIndex) => {
+    // debugger
+    let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+    if (fieldName === 'ldr_type') {
+      // debugger;
+      const _val = checkEntryType(event);
+      // let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+      _voucher_obj.child[eIndex].tr_type = _val.toUpperCase();
+      this.setState({
+        voucher_obj: _voucher_obj, formIsHalfFilledOut: true, refs_flag: {
+          new_ref_flag: false,
+          adj_ref_flag: false,
+          adv_ref_flag: false,
+          acc_ref_flag: false
+        },
+      })
+    } else if (fieldName === 'ref_tr_type') {
+      // debugger;
+      const _val = checkEntryType(event);
+      // let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+      _voucher_obj.child[eIndex].ref_child[rIndex].ref_tr_type = _val.toUpperCase();
+      this.setState({
+        voucher_obj: _voucher_obj, formIsHalfFilledOut: true, refs_flag: {
+          new_ref_flag: false,
+          adj_ref_flag: false,
+          adv_ref_flag: false,
+          acc_ref_flag: false
+        },
+      })
+    } else if (fieldName === 'narration') {
+      // debugger;
+      const _val = event.target.value;
+      let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+      _voucher_obj['narration'] = _val;
+      this.setState({
+        voucher_obj: _voucher_obj, formIsHalfFilledOut: true, refs_flag: {
+          new_ref_flag: false,
+          adj_ref_flag: false,
+          adv_ref_flag: false,
+          acc_ref_flag: false
+        },
+      })
+    } else if (fieldName === 'ldr_name') {
+      debugger;
+      let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+      const _val = event.target.value;
+      const ldr_list = (event.target.getAttribute('data-type') === "CR") ? "credit_ledgers" : "debit_ledgers";
+      const ledger_list = JSON.parse(JSON.stringify(this.state[ldr_list]));
+      const resData = accMethod.filterDataHandler(ledger_list, _val);
+
+      _voucher_obj.child[eIndex].ledger_name = resData['val_txt'];
+
+      this.setState({
+        filter_data: resData['filter_data'],
+        voucher_obj: _voucher_obj,
+        list_type: 'ledger',
+        cursor: resData['cursor'],
+        formIsHalfFilledOut: true, refs_flag: {
+          new_ref_flag: false,
+          adj_ref_flag: false,
+          adv_ref_flag: false,
+          acc_ref_flag: false
+        },
+      })
+    } else if (fieldName === 'ref_type') {
+      // debugger;
+      // let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+      const _val = event.target.value;
+      const ldr_list = (event.target.getAttribute('data-type') === "CR") ? "credit_ledgers" : "debit_ledgers";
+      const ledger_list = JSON.parse(JSON.stringify(this.state[ldr_list]));
+      const resData = accMethod.filterDataHandler(ledger_list, _val);
+
+      _voucher_obj.child[eIndex].ledger_name = resData['val_txt'];
+
+      this.setState({
+        filter_data: resData['filter_data'],
+        voucher_obj: _voucher_obj,
+        cursor: resData['cursor'],
+        formIsHalfFilledOut: true, refs_flag: {
+          new_ref_flag: false,
+          adj_ref_flag: false,
+          adv_ref_flag: false,
+          acc_ref_flag: false
+        },
+      })
+    } else if (fieldName === 'ref_name') {
+      // debugger;
+      // let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+      const _val = event.target.value;
+      _voucher_obj.child[eIndex].ref_child[rIndex].ref_name = _val;
+      this.setState({
+        voucher_obj: _voucher_obj,
+        formIsHalfFilledOut: true, refs_flag: {
+          new_ref_flag: false,
+          adj_ref_flag: false,
+          adv_ref_flag: false,
+          acc_ref_flag: false
+        },
+      })
+    } else if (fieldName === 'ldr_amo') {
+      this.updateTransetionAmountHandler(event, eIndex, trType, fieldName);
+    } else if (fieldName === 'ref_tr_amount') {
+      //      debugger;
+      this.updateRefsTransetionAmountHandler(event, eIndex, rIndex);
+
+    } else {
+      this.setState({
+        [fieldName]: isCheckbox ? event.target.checked : event.target.value,
+        formIsHalfFilledOut: true, refs_flag: {
+          new_ref_flag: false,
+          adj_ref_flag: false,
+          adv_ref_flag: false,
+          acc_ref_flag: false
+        },
+      })
+    }
+  };
+
+
+  blurHandler = (event, fieldName, eIndex, rIndex) => {
+    if (fieldName === 'ref_tr_amount') {
+      const _default_val = event.target.value;
+      const _voucher_obj = this.state.voucher_obj;
+      const _tr_amo = _voucher_obj.child[eIndex].ref_child[rIndex].ref_tr_amount;
+      if (_tr_amo !== _default_val) {
+        alert("Please Again Fill this amount!!!");
+      }
+    }
+  };
+
+
+
+  updateTransetionAmountHandler(e, eIndex, trType, fieldName) {
+    // debugger
+    let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+    const _val = e.target.value;
+    _voucher_obj.child[eIndex].tr_amount = _val;
+    // const lastBalanType = _voucher_obj.child[eIndex].ldr_last_balance_type;
+    // if (trType === lastBalanType) {
+    //   _voucher_obj.child[eIndex].ldr_crnt_balance = _voucher_obj.child[eIndex].ldr_last_balance + _val;
+    // } else {
+    //   _voucher_obj.child[eIndex].ldr_crnt_balance = _voucher_obj.child[eIndex].ldr_last_balance - _val;
+    // }
+    this.setState({
+      list_type: '',
+      last_fieldName: fieldName,
+      voucher_obj: _voucher_obj,
+      tr_type: trType,
+      formIsHalfFilledOut: true, refs_flag: {
+        new_ref_flag: false,
+        adj_ref_flag: false,
+        adv_ref_flag: false,
+        acc_ref_flag: false
+      },
+    })
+  }
+
+
+
+  ledgerListHandler = (obj) => {
+    // debugger;
+    this.setState({
+      filter_data: obj['filter_data'],
+      eindex: obj['eindex'],
+      rindex: obj['rindex'],
+      cursor: obj['cursor'],
+      list_type: obj['list_type'],
+      formIsHalfFilledOut: true
+    })
+  }
+
+  tabAndEnterHandler(ev) {
+    // debugger;
+    ev.preventDefault();
+    const ename = ev.target.dataset.ename;
+    const _val = Number(ev.target.value);
+    if (ev.shiftKey) {
+      // alert("Shift Key Active");
+      const allinput = getAllInputs();
+      const nextTi = accMethod.getNextInputHandler(ev, getAllInputs());
+      const nextInput = allinput[nextTi]
+      accMethod.selectAndFocusNext(nextInput);
+    } else {
+
+      const { list_type } = this.state;
+      if ((ename === "ref_type" || ename === "ref_name") && !isEmpty(list_type)) {
+        if (list_type === "adjustment") {
+          this.refsTypeHandler(ev);
+        } else if (list_type === "old_refs") {
+          this.getOldRefsDataHandler(ev);
+        } else {
+          const allinput = getAllInputs();
+          const nextTi = accMethod.getNextInputHandler(ev, getAllInputs());
+          const nextInput = allinput[nextTi]
+          accMethod.selectAndFocusNext(nextInput);
+        }
+      } else if (ename === "ref_tr_type" && isEmpty(list_type)) {
+        this.getNewRefsVSledgerHandler(ev);
+      } else if (ename === "ldr_amo" && (isEmpty(_val) || _val === 0)) {
+        alert("Insert Amount")
+      } else {
+        this.ledgerNameAndAmountHandler(ev)
+      }
+      // }
+    }
+
+  }
+
+  ledgerNameAndAmountHandler(ev) {
+    // debugger
+    ev.preventDefault();
+    const allinput = getAllInputs();
+    let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+    const ename = ev.target.dataset.ename;
+    const eindex = ev.target.dataset.eindex;
+    //const rindex = ev.target.dataset.rindex;
+    // const _ti = ev.target;
+    // let input_index = ''; // current input index
+    // allinput.forEach((item, inx) => { if (item === _ti) { input_index = inx; } });
+    const nextTi = accMethod.getNextInputHandler(ev, getAllInputs());
+    const nextInput = allinput[nextTi];
+    // console.log(this.state.cursor);
+    if (nextTi !== -1) {
+      if (ename === "ldr_amo") {
+        // console.log("last transaction");
+        const gTotal = accMethod.getSumOfBalanceHandler(_voucher_obj, eindex);
+        if (gTotal.total_cr !== gTotal.total_dr) {
+          this.checkEntriesHandler(ev, gTotal);
+        } else {
+          this.checkLedgerStatusHandler(ev)
+          //accMethod.selectAndFocusNext(nextInput);
+        }
+      } else if (nextTi === 1) {
+        // console.log("first")
+        accMethod.selectAndFocusNext(nextInput);
+      } else if (ename === "narration") {
+        // console.log("for submit")
+        debugger;
+        if (!isEmpty(_voucher_obj.cr_total_amo) || !isEmpty(_voucher_obj.dr_total_amo)) {
+          const obj = {
+            action: this.state.vchr_type,
+            voucher_obj: this.state.voucher_obj,
+            transaction_date: this.state.vchr_date,
+          }
+          this.testFinalObjectHandler(obj, ev);
+
+        } else {
+          alert('Something is Wrong!')
+        }
+      } else {
+        // console.log("select next")
+        // console.log(this.state.cursor);
+        accMethod.selectAndFocusNext(nextInput);
+      }
+    }
+    if (ename === 'ldr_name') {
+      // console.log("choose ldr")
+      // console.log(this.state.cursor);
+      this.chooseLedgerHandler(ev);
+    }
+  }
+
+  testFinalObjectHandler = (obj, ev) => {
+    // console.log(obj);
+    let gldr_amo = 0;
+    let glcr_amo = 0;
+    let ldr_err_count = 0;
+    let voucher_test = "error";
+
+    if (obj.voucher_obj.child.length > 1) {
+
+      const ledger_child = obj.voucher_obj.child.map((l_item, l_inx) => {
+
+        const ltr_amo = Number(l_item.tr_amount);
+        const ltr_tpe = l_item.tr_type;
+
+        let rdr_amo = 0;
+        let rcr_amo = 0;
+        let rfi_amo = 0;
+        let rtr_tpe = "";
+        let ledger_test = "error";
+
+        // ledgers
+        if (ltr_tpe === "CR") {
+          glcr_amo += ltr_amo;
+        } else if (ltr_tpe === "DR") {
+          gldr_amo += ltr_amo;
+        }
+
+        if (l_item.adjustment) {
+          if (l_item.ref_child.length > 0) {
+
+            /*---------------------------*/
+            // ref child
+            l_item.ref_child.map((r_item, r_inx) => {
+              if (r_item.ref_tr_type === "CR") {
+                rcr_amo += Number(r_item.ref_tr_amount);
+              } else if (r_item.ref_tr_type === "DR") {
+                rdr_amo += Number(r_item.ref_tr_amount);
+              }
+            })
+            if (rdr_amo !== rcr_amo) {
+              rfi_amo = Math.abs(rdr_amo - rcr_amo);
+              rtr_tpe = (rdr_amo > rcr_amo) ? "DR" : "CR";
+            }
+
+            if (ltr_amo === rfi_amo && ltr_tpe === rtr_tpe) {
+              ledger_test = "success";
+            } else {
+              ldr_err_count++;
+            }
+
+            /*---------------------------*/
+          } else {
+            ledger_test = "error";
+            ldr_err_count++;
+          }
+        }
+
+        if (l_item.cost_center) {
+          // cost center body required......
+          // matlab kaam baaki h
+          ledger_test = "success";
+        }
+
+        if (glcr_amo === gldr_amo && ldr_err_count === 0) {
+          voucher_test = "success"
+        }
+        return { ...l_item, ledger_test };
+      });
+      obj.voucher_obj.child = ledger_child;
+    } else {
+      voucher_test = "error";
+    }
+    const checkedobj = { ...obj, voucher_test };
+    this.setState({
+      finalState: JSON.parse(JSON.stringify(checkedobj))
+    }, () => {
+      this.confirmBoxSubmit(ev)
+    })
+  }
+
+  checkEntriesHandler(ev, gTotal) {
+    const gt = gTotal;
+    let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+    const index_last = _voucher_obj.child.length - 1;
+    if (!isEmpty(_voucher_obj.child[index_last].ledger_name)) {
+      _voucher_obj['cr_total_amo'] = (gt.total_cr > gt.total_dr) ? gt.total_cr : gt.total_dr;
+      _voucher_obj['dr_total_amo'] = (gt.total_cr > gt.total_dr) ? gt.total_cr : gt.total_dr;
+      _voucher_obj.child.push({
+        ldr_ref_id: "", tr_amount: Math.abs(gt.total_cr - gt.total_dr),
+        tr_type: (gt.total_cr < gt.total_dr) ? "CR" : "DR", ledger_name: '', adjustment: '', cost_center: ''
+      })
+      this.setState({
+        voucher_obj: _voucher_obj
+      }, () => this.nextInputManager(ev))
+    } else {
+      this.nextInputManager(ev)
+    }
+  };
+
+  componentDidMount() {
+    if (isEmptyObj(this.props.accLedgerEntry)) {
+      this.props.getAccLedgerEntry();
+    }
+    this.checkFlag();
+  }
+
+
+  checkFlag() {
+    setTimeout(() => {
+      const { accountManager, accLedgerEntry } = this.props;
+      if (accountManager && accLedgerEntry) {
+        this.componentDidMountHandler();
+        this.setArraowKeysHandler();
+      } else {
+        this.checkFlag()
+      }
+    }, 100);
+  }
+
+  componentWillUnmount() {
+    // window.document.removeEventListener('keydown', this, false)
+  }
+
+  componentDidMountHandler() {
+    // console.log('259-accounting_voucher')
+    const { accountManager: { all_ledgers } } = this.props;
+    const { vchr_type } = this.state;
+    const resData = accMethod.effectedLedgerHandler(vchr_type, all_ledgers);
+    // debugger;
+    this.setState({
+      credit_ledgers: resData['credit_ledgers'],
+      debit_ledgers: resData['debit_ledgers'],
+    }, () => {
+      this.getRelativeLedgerListHandler();
+      // accMethod.focusFirstHandler();
+    })
+  }
+
+  getRelativeLedgerListHandler() {
+    const { accountManager: { all_ledgers }, accLedgerEntry, match, voucherSummary: reSVchr } = this.props;
+    const _av_id = match.params.id;
+
+    if (_av_id) {
+      this.props.getVoucherEntryHandler({ "vchrid": _av_id, "ldr_data": accLedgerEntry, "all_ledgers": all_ledgers });
+    } else {
+      accMethod.focusFirstHandler();
+    }
+
+  }
+
+  setVoucherHandler(reSVchr) {
+    this.setState({
+      voucher_obj: {
+        "child": reSVchr['child'],
+        "narration": reSVchr['narration'],
+        'cr_total_amo': reSVchr['cr_total_amo'],
+        'dr_total_amo': reSVchr['dr_total_amo'],
+      },
+      vchr_type: reSVchr['vchr_type'],
+      vch_no: reSVchr['vch_no'],
+      first_vchr_type: 'CR',
+    },
+      // () => { accMethod.focusFirstHandler(); }
+    )
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.voucherSummary) {
+      this.setVoucherHandler(nextProps.voucherSummary);
+    }
+  }
+
+  selectVoucherTypeHandler(ev, val) {
+    const r = window.confirm("Are you sure? Change Page!! If 'Yes' Your 'field DATA' will be lost...");
+    if (r) {
+      const { match } = this.props;
+      const _av_id = match.params.id;
+      if (_av_id) {
+        this.props.history.push({
+          pathname: '/accounting_voucher.jsp',
+        })
+      }
+      ev.preventDefault();
+      switch (val) {
+        case "Receipt":
+          // Receipt Voucher
+          this.addNewVoucher("CR", val);
+          break;
+        case "Payment":
+          // Receipt Voucher
+          this.addNewVoucher("DR", val);
+          break;
+        case "Contra":
+          // Receipt Voucher
+          this.addNewVoucher("CR", val);
+          break;
+        default:
+          // Journal
+          this.addNewVoucher("DR", val);
+      }
+    }
+  }
+
+  addNewVoucher(tr_type, vchr_type) {
+    debugger;
+    this.setState({
+      voucher_obj: {
+        "child": [{
+          ldr_ref_id: '', tr_amount: '', tr_type: tr_type, ledger_name: '', adjustment: '', cost_center: '',
+          ref_child: [{ id: "", ref_type: "", ref_name: "", ref_tr_amount: "", ref_tr_type: "" }]
+        }],
+        narration: ''
+      },
+      list_type: '',
+      vchr_type: vchr_type,
+      first_vchr_type: tr_type,
+      formIsHalfFilledOut: true
+    }, () => {
+      this.componentDidMountHandler();
+    })
+  }
+
+  staticHeader() {
+    return <div className="acc-page-head container-fluid">
+      <div className="sec-title">
+        <div className="title-zone">Particulars</div>
+        <div className="info-zone">
+          <div className="info-zone">
+            <table className="table table-bordered table-sm">
+              <tbody>
+                <tr>
+                  <td>
+                    <div className="dr-title">Debit</div>
+                  </td>
+                  <td>
+                    <div className="cr-title">Credit</div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  };
+  activeThisHandler = (index) => {
+    // console.log("aaa")
+    // this.setState({ cursor: index })
+  }
+  filteredLedgerListHandler(filter_data, cursor) {
+    if (filter_data.length > 0) {
+      return (<div className="list-accunts">
+        <div className="list-acc-head">List of Ledger Accunts</div>
+        <div className="list-acc-body" id="ldrList">
+          <ul>
+            {filter_data.map((item, index) => {
+              return (
+                <li
+                  className={cursor === index ? 'active' : null}
+                  onClick={event => this.activeThisHandler(index)}
+                  key={index}>
+                  {item.ledger_name}
+                </li>
+              )
+            })}
+          </ul>
+        </div>
+        <div className="list-acc-footer">more...</div>
+      </div>
+      )
+    }
+  }
+
+  ///////////////////////////////////////////////////////
+
+  setCredentialsHandler = (event, eIndex, rIndex, list_type) => {
+    // debugger;
+    // for Active Adjustment List
+    let _cursor = this.state.cursor;
+    const ename = event.target.dataset.ename;
+    this.setState({
+      // refs_type_flag: true,
+      // list_type: 'adjustment',
+      cursor: (ename === 'ref_type' || ename === 'ref_name') ? 0 : _cursor,
+      list_type: list_type,
+      eindex: eIndex,
+      rindex: rIndex,
+      refs_flag: { new_ref_flag: false, adj_ref_flag: false, adv_ref_flag: false, acc_ref_flag: false },
+    })
+  }
+
+  nextInputManager(ev) {
+    ev.preventDefault();
+    const allinput = getAllInputs();
+    // const _ti = ev.target;
+    // let input_index = ''; // current row index
+    // allinput.forEach((item, inx) => { if (item === _ti) { input_index = inx; } });
+
+    const nextTi = accMethod.getNextInputHandler(ev, getAllInputs());
+    const nextInput = allinput[nextTi]
+    accMethod.selectAndFocusNext(nextInput);
+
+  }
+
+  refsTypeHandler(ev) {
+    // debugger
+    ev.preventDefault();
+    let new_ref_flag = false;
+    let adj_ref_flag = false;
+    let adv_ref_flag = false;
+    let acc_ref_flag = false;
+    const { cursor, refs_type, voucher_obj, eindex, rindex, } = this.state;
+    const crRef = refs_type[cursor];
+    let _voucher_obj = JSON.parse(JSON.stringify(voucher_obj));
+
+    const resObj = accMethod.getRefExpectedBalanceHandler(_voucher_obj, eindex, rindex);
+
+    _voucher_obj.child[eindex].ref_child[rindex]['id'] = crRef.id;
+    _voucher_obj.child[eindex].ref_child[rindex]['ref_type'] = crRef.item;
+    if (_voucher_obj.child[eindex].ref_child[rindex]['ref_tr_amount'] === "") {
+      _voucher_obj.child[eindex].ref_child[rindex]['ref_tr_amount'] = resObj.expec_amo;
+    }
+    if (_voucher_obj.child[eindex].ref_child[rindex]['ref_tr_type'] === "") {
+      _voucher_obj.child[eindex].ref_child[rindex]['ref_tr_type'] = resObj.expec_type;
+    }
+
+    if (crRef.id === 1) {       // console.log("New Ref")
+      const last = this.props.accountManager.adjustments.length;
+      const _ref_name = Number(this.props.accountManager.adjustments[last - 1].id) + 1;
+      _voucher_obj.child[eindex].ref_child[rindex]['ref_name'] = _ref_name;
+      new_ref_flag = true;
+    } else if (crRef.id === 2) {      // console.log("Adjustment")
+      adj_ref_flag = true;
+      const _ldr_ref_id = ev.target.dataset.erefid;
+      this.selectLedgerwiseExistingRefsHandler(_ldr_ref_id);
+      _voucher_obj.child[eindex].ref_child[rindex]['ref_name'] = '';
+    } else if (crRef.id === 3) {      // console.log("Advance")
+      adv_ref_flag = true
+    } else if (crRef.id === 4) {      // console.log("On Account")
+      acc_ref_flag = true
+    }
+    // console.log(_voucher_obj);
+    this.setState({
+      voucher_obj: _voucher_obj,
+      refs_type_flag: false,
+      cursor: (adj_ref_flag) ? 0 : cursor,
+      list_type: (adj_ref_flag) ? 'old_refs' : '',
+      refs_flag: {
+        new_ref_flag: new_ref_flag,
+        adj_ref_flag: adj_ref_flag,
+        adv_ref_flag: adv_ref_flag,
+        acc_ref_flag: acc_ref_flag
+      }
+    }, () => {
+      this.nextInputManager(ev);
+    })
+
+
+
+  }
+
+  selectLedgerwiseExistingRefsHandler = (id) => {
+    debugger;
+    const { adjustments } = this.props.accountManager;
+    let adj_list = [];
+    if (adjustments.length > 0) {
+      adj_list = adjustments.filter(e => e.ldr_ref_id === id)
+    }
+    this.setState({ adj_list: adj_list })
+    // return adj_list;
+  }
+
+  getOldRefsDataHandler = (ev) => {
+    debugger
+    ev.preventDefault()
+    const { cursor, adj_list, eindex, rindex, voucher_obj } = this.state;
+    const adjData = adj_list[cursor];
+    // console.log(adjData);
+    let _voucher_obj = JSON.parse(JSON.stringify(voucher_obj));
+    _voucher_obj.child[eindex].ref_child[rindex]['ref_name'] = adjData.id;
+    // _voucher_obj.child[eindex].ref_child[rindex]['ref_tr_amount'] = adjData.tr_amount;
+
+    this.setState({
+      voucher_obj: _voucher_obj,
+      refs_flag: { new_ref_flag: false, adj_ref_flag: false, adv_ref_flag: false, acc_ref_flag: false },
+    }, () => {
+      this.nextInputManager(ev);
+    })
+
+  }
+
+  activeRefListFlag = () => {
+    this.setState({
+      refs_flag: { new_ref_flag: false, adj_ref_flag: true, adv_ref_flag: false, acc_ref_flag: false },
+    })
+  }
+
+
+  updateRefsTransetionAmountHandler = (event, eIndex, rIndex) => {
+    let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+    const _val = event.target.value;
+    _voucher_obj.child[eIndex].ref_child[rIndex].ref_tr_amount = _val;
+
+    this.setState({
+      list_type: '',
+      voucher_obj: _voucher_obj,
+      formIsHalfFilledOut: true, refs_flag: {
+        new_ref_flag: false,
+        adj_ref_flag: false,
+        adv_ref_flag: false,
+        acc_ref_flag: false
+      },
+    })
+
+  }
+
+  addNewRefsHandler = (ev) => {
+    debugger
+    const eindex = ev.target.dataset.eindex;
+    const rindex = Number(ev.target.dataset.rindex);
+    // const ename = ev.target.dataset.ename;
+    const voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+    const last_elem = voucher_obj.child[eindex].ref_child.length - 1;
+    if (rindex === last_elem) {
+      const new_ref_obj = { id: "", ref_type: "", ref_name: "", ref_tr_amount: "", ref_tr_type: "" };
+      voucher_obj.child[eindex].ref_child.push(new_ref_obj);
+      this.setState({
+        voucher_obj: voucher_obj,
+      }, () => { this.nextInputManager(ev) })
+    } else {
+      this.nextInputManager(ev)
+    }
+  }
+
+  getNewRefsVSledgerHandler = (ev) => {
+    debugger
+    let _voucher_obj = JSON.parse(JSON.stringify(this.state.voucher_obj));
+    const _eindex = ev.target.dataset.eindex;
+    const _rindex = ev.target.dataset.rindex;
+    // const res_obj = accMethod.getLedgerANDrefsBalance(_voucher_obj, _eindex);
+    // console.log(res_obj);
+
+    const ldr_amo = Number(_voucher_obj.child[_eindex].tr_amount);
+    const ldr_type = _voucher_obj.child[_eindex].tr_type;
+    let cr_ref_amo = 0;
+    let dr_ref_amo = 0;
+    _voucher_obj.child[_eindex].ref_child.forEach((elem, index) => {
+      if (index <= _rindex) {
+        if (elem.ref_tr_type === "CR") {
+          cr_ref_amo += Number(elem.ref_tr_amount)
+        } else {
+          dr_ref_amo += Number(elem.ref_tr_amount)
+        }
+      }
+    });
+    let ref_type = (cr_ref_amo < dr_ref_amo) ? "DR" : "CR";
+    let ref_amo = Math.abs(cr_ref_amo - dr_ref_amo);
+
+    if ((ldr_amo === ref_amo) && (ref_type === ldr_type)) {
+      // remove extra refs
+      const _rindex = Number(ev.target.dataset.rindex);
+      const ref_child_count = _voucher_obj.child[_eindex].ref_child.length;
+      if (ref_child_count > _rindex + 1) {
+        const _refs = _voucher_obj.child[_eindex].ref_child.filter((item, inx) => {
+          return inx <= _rindex;
+        })
+        _voucher_obj.child[_eindex].ref_child = _refs;
+        this.setState({
+          voucher_obj: _voucher_obj
+        }, () => { this.ledgerNameAndAmountHandler(ev) })
+      } else {
+        this.ledgerNameAndAmountHandler(ev)
+      }
+    } else {
+      this.addNewRefsHandler(ev)
+    }
+  }
+
+
+  ///////////////////////////////////////////////////////
+
+
+
+  confirmBoxSubmit = (event) => {
+    event.preventDefault();
+    confirmAlert({
+      title: 'stay one moment!',
+      message: 'Are you sure do you want to Update these.',
+      buttons: [
+        {
+          label: 'Yes',
+          type: 'submit',
+          onClick: () => {
+            this.createHandler();
+          }
+        },
+        {
+          label: 'No',
+          onClick: () => {
+            this.cancleHandler()
+          }
+        }
+      ]
+    });
+  };
+
+  cancleHandler = () => {
+    accMethod.focusFirstHandler();
+  }
+
+
+  createHandler = () => {
+    const _obj = this.state.finalState;
+    if (!isEmptyObj(_obj)) {
+      console.log(JSON.stringify(_obj));
+      this.props.receiptAccVoucherEntry(_obj);
+    } else {
+      Alert.error('Something went wrong. !!', {
+        position: 'bottom-right',
+        effect: 'jelly',
+        timeout: 5000, offset: 40
+      });
+    }
+
+    /*
+    const { match } = this.props;
+    const _av_id = match.params.id;
+    if (_av_id) {
+      this.props.history.push({
+        pathname: '/accounting_voucher.jsp',
+      })
+    }
+    const tr_type = this.state.first_vchr_type;
+    const vchr_type = this.state.vchr_type;
+    this.addNewVoucher(tr_type, vchr_type)
+    */
+  }
+
+
+  render() {
+    const { user, accountManager, accLedgerEntry } = this.props;
+    const { voucher_obj, filter_data, vchr_type, refs_type, refs_type_flag, list_type, refs_flag, adj_list,
+      eindex, rindex,
+      formIsHalfFilledOut, cursor, vchr_date, credit_ledgers, debit_ledgers } = this.state;
+    // console.log(this.state.voucher_obj);
+    return (
+      <div className="page-content">
+        <Helmet>
+          <title>{vchr_type} Voucher</title>
+        </Helmet>
+        <Prompt when={formIsHalfFilledOut} message="Are you sure? Change Page!! If 'Yes' Your 'field DATA' will be lost..." />
+        <div className="page-bar d-flex">
+          <div className="page-title"> {vchr_type} Voucher</div>
+          {user &&
+            <div className="form-inline ml-auto filter-panel">
+              <span className="filter-closer">
+                <button type="button" className="btn btn-danger filter-toggler-c">
+                  <i className="fa fa-times"></i>
+                </button>
+              </span>
+              <div className="filter-con inline-box">
+                <div className="form-group mr-2 mt-2">
+                  <ul className="nav d-flex mr-4">
+                    <li className="nav-item mr-1">
+                      <button
+                        type="button"
+                        onClick={(event) => this.selectVoucherTypeHandler(event, "Receipt")}
+                        className={`btn  btn-sm ${(vchr_type === "Receipt") ? ' btn-secondary ' : ' btn-outline-secondary '}`}>
+                        Receipt</button>
+                    </li>
+                    <li className="nav-item mr-1">
+                      <button
+                        type="button"
+                        onClick={(event) => this.selectVoucherTypeHandler(event, "Payment")}
+                        className={`btn  btn-sm ${(vchr_type === "Payment") ? ' btn-secondary ' : ' btn-outline-secondary '}`}>
+                        Payment</button>
+                    </li>
+                    <li className="nav-item mr-1">
+                      <button
+                        type="button"
+                        onClick={(event) => this.selectVoucherTypeHandler(event, "Journal")}
+                        className={`btn  btn-sm ${(vchr_type === "Journal") ? ' btn-secondary ' : ' btn-outline-secondary '}`}>
+                        Journal</button>
+                    </li>
+                    <li className="nav-item mr-1">
+                      <button
+                        type="button"
+                        onClick={(event) => this.selectVoucherTypeHandler(event, "Contra")}
+                        className={`btn  btn-sm ${(vchr_type === "Contra") ? ' btn-secondary ' : ' btn-outline-secondary '}`}>
+                        Contra</button>
+                    </li>
+                  </ul>
+                </div>
+                <div className="form-group mt-1">
+                  <DatePicker
+                    onChange={this.examStartDate}
+                    value={vchr_date}
+                    showLeadingZeroes={true}
+                  //minDate={new Date()}
+                  />
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        {user && voucher_obj && accountManager && accLedgerEntry &&
+          <div className="card card-box sfpage-cover light-trans">
+            <div className="card-body p-1 sfpage-body">
+              <div className="acc-page page-receipt-voucher">
+                {(list_type === "ledger") &&
+                  this.filteredLedgerListHandler(filter_data, cursor)
+                }
+                {this.staticHeader()}
+                <div className="acc-page-body container-fluid">
+                  <div className="av-detail-zone">
+                    {voucher_obj.child.map((item, index) => {
+                      return (
+                        <div className="av-detail-head" key={index}>
+                          <SingleEntry
+                            eIndex={index}
+                            cursor={cursor}
+                            eindex={eindex}
+                            rindex={rindex}
+                            refs_type_flag={refs_type_flag}
+                            adj_list={adj_list}
+                            refs_flag={refs_flag}
+                            refs_type={refs_type}
+                            list_type={list_type}
+                            setCredentialsHandler={this.setCredentialsHandler}
+                            activeRefListFlag={this.activeRefListFlag}
+                            activeThisHandler={this.activeThisHandler}
+                            eItem={item}
+                            credit_ledgers={credit_ledgers}
+                            debit_ledgers={debit_ledgers}
+                            ledgerListHandler={this.ledgerListHandler}
+                            changeHandler={this.changeHandler}
+                            // selectLedgerwiseExistingRefsHandler={this.selectLedgerwiseExistingRefsHandler}
+                            valueTOchangeHandler={this.valueTOchangeHandler}
+                            blurHandler={this.blurHandler}
+                          />
+                        </div>
+                      )
+                    })}
+                  </div>
+
+                </div>
+                <div className="acc-page-footer av-page-footer container-fluid">
+                  <div className="sec-foot">
+                    <div className="narration-zone">
+                      <div className="title">Narration:</div>
+                      <textarea
+                        value={voucher_obj.narration}
+                        data-ename={'narration'}
+                        onFocus={event => this.setCredentialsHandler(event, null, null, null)}
+                        onChange={event => this.changeHandler(event, `narration`)}
+                        className="form-control" >
+                      </textarea>
+                    </div>
+                    <div className="amount-zone">
+                      <div className="dr-total">{voucher_obj.dr_total_amo}</div>
+                      <div className="cr-total">{voucher_obj.cr_total_amo}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div >
+    )
+  }
+}
+function mapStateToProps(state) {
+  const { item: user } = state.authentication;
+  const filteredSchoolData = state.filteredSchoolData;
+  const filteredClassesData = state.filteredClassesData;
+  const { item: accountManager } = state.accountManager;
+  const { item: accLedgerEntry } = state.accLedgerEntry;
+  const { item: voucherSummary } = state.voucherSummary;
+
+  return {
+    user, accountManager, accLedgerEntry, voucherSummary,
+    filteredSchoolData, filteredClassesData
+  };
+}
+
+const actionCreators = {
+  getAccLedgerEntry: accLedgerEntryActions.getAccLedgerEntry,
+  getVoucherEntryHandler: voucherSummaryActions.getVoucherEntryHandler,
+  receiptAccVoucherEntry: accVoucherEntryActions.receiptAccVoucherEntry,
+}
+
+export default connect(mapStateToProps, actionCreators)(withRouter(AccountingVoucher));
