@@ -1,0 +1,23 @@
+http://schools.rajpsp.com/ledger_monthly_summary.jsp/108_STU_4
+-- chart background Color
+-- amount with .00 digit
+http://schools.rajpsp.com/ledger_vouchers.jsp/108_STU_4/02
+-- Opening Balance 
+-- Current Total 
+-- Closing Balance 
+http://schools.rajpsp.com/accounting_voucher.jsp/4055
+-- total balance with .00 digit
+http://schools.rajpsp.com/balance_sheet.jsp
+http://schools.rajpsp.com/profit_n_loss.jsp
+-- amount with .00 digit
+http://schools.rajpsp.com/all_subject.jsp
+-- label with &nbsp;
+"Menu" remove in coching.
+-- All Exams
+-- Add/ update Max Mars,
+-- Exam Shedule
+http://schools.rajpsp.com/all_fee_structure.jsp
+-- some thing is wrong
+http://schools.rajpsp.com/all_events.jsp
+-- new event not saved
+
