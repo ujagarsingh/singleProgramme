@@ -1,0 +1,127 @@
+﻿<script>
+  let _timer = 1000;
+  let _index = 0;
+  let isQuestionTime = true;
+  const _json = [
+    { q : 'question a',  a : 'answer a'    },
+    { q : 'question b',  a : 'answer b'    },
+    { q : 'question c',  a : 'answer c'    },
+    { q : 'question d',  a : 'answer d'    },
+    { q : 'question e',  a : 'answer e'    },
+  ] ;
+
+  function nextQuestion(_index){
+    const _que = _json[_index].q;
+    $('#qestionX').text(_que);
+    $('#answerX').text('');
+    isQuestionTime = false;
+  }
+  function nextAnswer(_index){
+    const _ans = _json[_index].a;
+    $('#answerX').text(_ans);
+    isQuestionTime = true;
+  }
+
+  let myVar = setInterval(intervalFun, 1000);
+
+  function intervalFun(){
+    if(_index < _json.length){
+      if(isQuestionTime){
+        nextQuestion(_index)
+       } else {
+        nextAnswer(_index);
+        _index += 1;
+       }
+    } else {
+      clearInterval(myVar);
+    }
+  }
+
+  </script>
+  
+forceful,
+deterrence,
+probe,
+gaps and lapses,
+sinks off,
+kin,
+invoke,
+controversy,
+leery,
+indiscriminate,
+portfolios
+
+जोरदार,
+निवारण,
+जांच ,
+अंतराल और चूक,
+डूब जाता है,
+परिजन,
+आह्वान,
+विवाद,
+चालाक,
+अविवेकी,
+विभागों
+
+mucormycosis 
+rise 
+kno 
+epidemic
+truce
+onus
+sunk
+profoundly
+soul
+adversaries
+deceitful
+mystery
+
+श्लेष्मा रोग
+वृद्धि
+पता
+महामारी
+युद्धविराम संधि
+भार
+डूब
+गंभीरतापूर्वक
+अन्त: मन
+विरोधी
+छल से
+रहस्य
+
+severe
+intensify
+capsizes
+coastal
+urge
+procure
+fugitive
+fled
+amid
+denies
+Outrageous
+Sanctions
+
+गंभीर
+
+तेज
+
+पलटना
+
+तटीय
+
+आग्रह करता हूं
+
+खरीद
+
+भगोड़ा
+
+भाग गए
+
+के बीच
+
+से इनकार करते हैं
+
+अपमानजनक
+
+प्रतिबंध
