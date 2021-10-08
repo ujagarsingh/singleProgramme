@@ -1,3 +1,9 @@
+I apologize for not attending the interview this Saturday. 
+
+I have suddenly come to know that I will have to go to the in-laws' house tomorrow. From some family reason. so i am not able for interview. after coming from in-laws' next saturday i will able to do. 
+
+I am very sorry please.
+
 var date1 = new Date("Fri Feb 15 2019 16:44:35 GMT+0530 (India Standard Time)");
 var date2 = new Date("Fri Feb 15 2019 16:54:35 GMT+0530 (India Standard Time)");
 var timeDiff = Math.abs(date2.getTime() - date1.getTime());
