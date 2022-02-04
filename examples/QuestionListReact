@@ -1,0 +1,50 @@
+
+A. protected Rouunter in V6/v5
+B. multiple router in v6/v5
+C. fakeStore using Axios, React, Redux Normal.
+D. fakeStore using Axios, React, Redux TookKit.
+E. CRUD App using Fake Json Server
+F. Typechecking with proptypes. 
+F. HOC. 
+
+1. Create a Counter app using Class and Functional Component 
+2. Create a Counter app using Class and Functional Component.
+	1. using for loop to increse 5 times in a single click.
+3. Display FirstName and LastName 2 diffrent keys in a name Object using setState Hook.
+4. create and display a number list using array Object using setState Hook.
+5. Create a Counter app using Class and Functional Component and update title with counter.
+6. Create a Counter app using Class and Functional Component and 
+	1. Update counter when we are Click button.
+	2. Update name input value.
+	   but both are separate.
+7. Create a MousePointer Display in class and functional Component.
+	A. Show x,y cordinate when mouse move.
+	B. Toggle button to show/hide component remove subscriptions.
+8. Create Counter App using Class and functional Component. with update counter every second.
+9. Create Fatch data component using axios.
+	A. Get Data and show in a list.
+	B. Get Single Data according to Id.
+	C. Get Data from button click to given id in Input Box.
+10. Pass data and action in third level child using context api and get it using useContext.
+	A. three level child class and functional component.
+	B. create counter app but counter button is in third lavel component.
+11. create a Simple counter app using useReducer Hook. 
+	A. without sending type of action and.
+	B. pass the parameter in onclick event.
+	C. Operation : Increment, Decrement, Reset.
+12. create a Simple counter app using useReducer Hook. 
+	A. sending type of action and.
+	B. pass the multiple incremental number.
+	C. Operation : Increment, Decrement, Reset.
+13. create a Simple counter app using useReducer Hook and share data. 
+	A. share counter value and dispatch methode in all 3 lavel nested component.
+14. Write a Example for useCallback Hook.
+	Ref. Title, Button( Increment Age, Increment Salary), Counter (Age, Salary)
+	A. Age + 1
+	B. Salary + 1000
+15. Create a search box and search button and clear button.
+	A. search button to console the keyword which is in the search box.
+	B. clear button to remove searchbox text and focus again it.
+16. Crete a Stop Timer Component using Class and Functional Component.
+	
+	
